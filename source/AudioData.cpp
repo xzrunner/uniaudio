@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <string.h>
+
 namespace ua
 {
 

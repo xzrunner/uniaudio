@@ -3,6 +3,8 @@
 #include <fs_file.h>
 #include <fault.h>
 
+#include <cstdio>
+
 namespace ua
 {
 
