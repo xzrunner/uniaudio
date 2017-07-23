@@ -202,9 +202,6 @@ void Mpg123Decoder::InitHandle()
 	}
 
 	long rate = 0;
-
-//	ret = mpg123_format(m_handle, 44100, m_channels, MPG123_ENC_SIGNED_16);
-
 	ret = mpg123_getformat(m_handle, &rate, &m_channels, NULL);
 	if (ret == MPG123_ERR) {
 		mpg123_delete(m_handle);

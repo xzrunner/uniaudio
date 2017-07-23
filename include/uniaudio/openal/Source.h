@@ -34,6 +34,9 @@ private:
 
 	ALuint m_source;
 
+	bool m_active;
+	bool m_paused;
+
 }; // Source
 
 }

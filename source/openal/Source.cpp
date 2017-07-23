@@ -12,6 +12,8 @@ Source::Source(AudioData* data)
 	: m_buffer(0)
 	, m_size(0)
 	, m_source(0)
+	, m_active(false)
+	, m_paused(false)
 {
 	alGetError();
 
@@ -65,28 +67,33 @@ bool Source::Play()
 		return false;
 	}
 
+	m_active = true;
+
 	return true;
 }
 
 void Source::Stop()
 {
-	ALenum err;
-
+	alSourceStop(m_source);
 	alSourcei(m_source, AL_BUFFER, AL_NONE);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("%s", "Source::Stop bind buffer error");
-		return;
-	}
+
+	m_active = false;
 }
 
 void Source::Pause()
 {
-
+	if (m_active) {
+		alSourcePause(m_source);
+		m_paused = true;
+	}
 }
 
 void Source::Resume()
 {
-
+	if (m_active && m_paused) {
+		alSourcePlay(m_source);
+		m_paused = false;
+	}
 }
 
 ALenum Source::GetFormat(int channels, int bit_depth)
