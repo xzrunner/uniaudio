@@ -4,6 +4,7 @@
 #include <CU_Uncopyable.h>
 
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 
@@ -16,6 +17,7 @@ class AudioData : private cu::Uncopyable
 {
 public:
 	AudioData(const std::string& filepath);
+	AudioData(const std::vector<ua::AudioData*>& list);
 	~AudioData();
 
 	const uint8_t* GetData() const { return m_data; }
@@ -27,6 +29,8 @@ public:
 
 private:
 	void LoadFromFile(const std::string& filepath);
+
+	void LoadFromList(const std::vector<ua::AudioData*>& list);
 
 	static Decoder* CreateDecoder(const std::string& filepath);
 
