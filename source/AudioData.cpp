@@ -68,6 +68,10 @@ void AudioData::LoadFromFile(const std::string& filepath)
 		decoded = decoder->Decode();
 	}
 
+	if (m_data && buf_size > m_size) {
+		m_data = static_cast<uint8_t*>(realloc(m_data, m_size));
+	}
+
 	m_sample_rate = decoder->GetSampleRate();
 	m_channels = decoder->GetChannels();
 	m_bit_depth = decoder->GetBitDepth();
