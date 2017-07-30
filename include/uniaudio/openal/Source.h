@@ -23,6 +23,7 @@ public:
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
+	virtual void Rewind();
 
 private:
 	static ALenum GetFormat(int channels, int bit_depth);

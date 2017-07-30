@@ -3,6 +3,8 @@
 
 #include <logger.h>
 
+#define FORCE_REPLAY
+
 namespace ua
 {
 namespace openal
@@ -46,11 +48,27 @@ Source::Source(AudioData* data)
 
 Source::~Source()
 {
+	if (m_active) {
+		Stop();
+	}
 	alDeleteBuffers(1, &m_buffer);
 }
 
 bool Source::Play()
 {
+	if (m_active) {
+		if (m_paused) {
+			Resume();
+			return true;
+		}
+#ifdef FORCE_REPLAY
+		else {
+			Rewind();
+			return true;
+		}
+#endif // FORCE_REPLAY
+	}
+
 	ALenum err;
 
 	alSourcei(m_source, AL_BUFFER, m_buffer);
@@ -93,6 +111,14 @@ void Source::Resume()
 	if (m_active && m_paused) {
 		alSourcePlay(m_source);
 		m_paused = false;
+	}
+}
+
+void Source::Rewind()
+{
+	alSourceRewind(m_source);
+	if (!m_paused) {
+		alSourcePlay(m_source);
 	}
 }
 
