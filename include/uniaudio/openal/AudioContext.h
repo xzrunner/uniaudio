@@ -2,6 +2,7 @@
 #define _UNIAUDIO_OPENAL_AUDIO_CONTEXT_H_
 
 #include "uniaudio/AudioContext.h"
+#include "uniaudio/Thread.h"
 
 #include <OpenAL/alc.h>
 
@@ -10,16 +11,14 @@ namespace ua
 namespace openal
 {
 
+class AudioPool;
 class AudioContext : public ua::AudioContext
 {
 public:
 	AudioContext();
 	virtual ~AudioContext();
 
-	virtual bool Play(Source* source);
-	virtual void Stop(Source* source);
-	virtual void Pause(Source* source);
-	virtual void Resume(Source* source);
+	virtual Source* CreateSource(const AudioData* data);
 
 private:
 	bool Init();
@@ -28,6 +27,9 @@ private:
 	ALCdevice* m_device;
 
 	ALCcontext* m_context;
+
+	AudioPool* m_pool;
+	thread::Thread* m_pool_thread;
 
 }; // AudioContext
 

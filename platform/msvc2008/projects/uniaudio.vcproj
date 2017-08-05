@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include"
+				AdditionalIncludeDirectories="..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include;..\..\..\..\editor-external\pthread\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include"
+				AdditionalIncludeDirectories="..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include;..\..\..\..\editor-external\pthread\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -165,6 +165,14 @@
 				</File>
 				<File
 					RelativePath="..\..\..\include\uniaudio\openal\AudioContext.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\openal\AudioPool.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\openal\AudioPool.h"
 					>
 				</File>
 				<File
@@ -230,6 +238,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\uniaudio\Exception.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\Thread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\Thread.h"
 				>
 			</File>
 		</Filter>

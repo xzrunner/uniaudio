@@ -5,6 +5,7 @@ namespace ua
 {
 
 class Source;
+class AudioData;
 
 class AudioContext
 {
@@ -12,10 +13,7 @@ public:
 	AudioContext() {}
 	virtual ~AudioContext() {}
 
-	virtual bool Play(Source* source) = 0;
-	virtual void Stop(Source* source) = 0;
-	virtual void Pause(Source* source) = 0;
-	virtual void Resume(Source* source) = 0;
+	virtual Source* CreateSource(const AudioData* data) = 0;
 
 }; // AudioContext
 

@@ -1,4 +1,5 @@
 #include "uniaudio/openal/Source.h"
+#include "uniaudio/openal/AudioPool.h"
 #include "uniaudio/AudioData.h"
 
 #include <logger.h>
@@ -10,8 +11,10 @@ namespace ua
 namespace openal
 {
 
-Source::Source(AudioData* data)
-	: m_buffer(0)
+Source::Source(AudioPool* pool, const AudioData* data)
+	: m_pool(pool)
+	, m_stream(false)
+	, m_buffer(0)
 	, m_size(0)
 	, m_source(0)
 	, m_active(false)
@@ -49,76 +52,131 @@ Source::Source(AudioData* data)
 Source::~Source()
 {
 	if (m_active) {
-		Stop();
+		m_pool->Stop(this);
 	}
 	alDeleteBuffers(1, &m_buffer);
 }
 
-bool Source::Play()
+void Source::Play()
 {
-	if (m_active) {
+	if (m_active) 
+	{
 		if (m_paused) {
-			Resume();
-			return true;
+			m_pool->Resume(this);
 		}
 #ifdef FORCE_REPLAY
 		else {
-			Rewind();
-			return true;
+			m_pool->Rewind(this);
 		}
 #endif // FORCE_REPLAY
+		return;
 	}
 
-	ALenum err;
-
-	alSourcei(m_source, AL_BUFFER, m_buffer);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("%s", "Source::Play bind buffer error");
-		return false;
-	}
-
-	alGetError();
-
-	alSourcePlay(m_source);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("%s", "Source::Play alSourcePlay error");
-		return false;
-	}
-
-	m_active = true;
-
-	return true;
+	m_active = m_pool->Play(this, m_source);
 }
 
 void Source::Stop()
 {
-	alSourceStop(m_source);
-	alSourcei(m_source, AL_BUFFER, AL_NONE);
-
-	m_active = false;
+	if (m_active) {
+		m_pool->Stop(this);
+	}
 }
 
 void Source::Pause()
 {
-	if (m_active) {
-		alSourcePause(m_source);
-		m_paused = true;
-	}
+	m_pool->Pause(this);
 }
 
 void Source::Resume()
 {
-	if (m_active && m_paused) {
-		alSourcePlay(m_source);
-		m_paused = false;
-	}
+	m_pool->Resume(this);
 }
 
 void Source::Rewind()
 {
-	alSourceRewind(m_source);
-	if (!m_paused) {
-		alSourcePlay(m_source);
+	m_pool->Rewind(this);
+}
+
+void Source::PlayImpl()
+{
+	if (m_stream)
+	{
+
+	}
+	else
+	{
+		alSourcei(m_source, AL_BUFFER, m_buffer);
+		if (alGetError() != AL_NO_ERROR)  {
+			LOGW("%s", "Source::PlayImpl bind buffer error");
+			return;
+		}
+	}
+
+	alSourcePlay(m_source);
+	if (alGetError() != AL_NO_ERROR)  {
+		LOGW("%s", "Source::PlayImpl alSourcePlay error");
+		return;
+	}
+
+	m_active = true;
+
+}
+
+void Source::StopImpl()
+{
+	if (m_active)
+	{
+		if (m_stream)
+		{
+			// 
+		}
+		else
+		{
+			alSourceStop(m_source);
+		}
+		alSourcei(m_source, AL_BUFFER, AL_NONE);
+	}
+	m_active = false;
+}
+
+void Source::PauseImpl()
+{
+ 	if (m_active) {
+ 		alSourcePause(m_source);
+ 		m_paused = true;
+ 	}
+}
+
+void Source::ResumeImpl()
+{
+ 	if (m_active && m_paused) {
+ 		alSourcePlay(m_source);
+ 		m_paused = false;
+ 	}
+}
+
+void Source::RewindImpl()
+{
+	if (m_active)
+	{
+		if (m_stream)
+		{
+
+		}
+		else
+		{
+		 	alSourceRewind(m_source);
+		 	if (!m_paused) {
+		 		alSourcePlay(m_source);
+		 	}
+		}
+	}
+	else
+	{
+		if (m_stream)
+		{
+			// 
+		}
 	}
 }
 
