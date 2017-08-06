@@ -6,6 +6,7 @@ namespace ua
 
 class Source;
 class AudioData;
+class Decoder;
 
 class AudioContext
 {
@@ -14,6 +15,7 @@ public:
 	virtual ~AudioContext() {}
 
 	virtual Source* CreateSource(const AudioData* data) = 0;
+	virtual Source* CreateSource(Decoder* decoder) = 0;
 
 }; // AudioContext
 

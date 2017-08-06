@@ -1,8 +1,8 @@
 #include "uniaudio/AudioData.h"
-#include "uniaudio/Mpg123Decoder.h"
 #include "uniaudio/Exception.h"
+#include "uniaudio/DecoderFactory.h"
+#include "uniaudio/Decoder.h"
 
-#include <algorithm>
 #include <limits>
 
 #include <string.h>
@@ -39,7 +39,7 @@ AudioData::~AudioData()
 
 void AudioData::LoadFromFile(const std::string& filepath)
 {
-	Decoder* decoder = CreateDecoder(filepath);
+	Decoder* decoder = DecoderFactory::Create(filepath);
 	if (!decoder) {
 		return;
 	}
@@ -147,19 +147,6 @@ void AudioData::LoadFromList(const std::vector<ua::AudioData*>& list)
 			memcpy(&m_data[ptr], &ad->m_data[ptr], ad->m_size - ptr);
 		}
 	}
-}
-
-Decoder* AudioData::CreateDecoder(const std::string& filepath)
-{
-	Decoder* decoder = NULL;
-
-	std::string ext = filepath.substr(filepath.find_last_of('.') + 1);
-	std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
-	if (ext == "mp3") {
-		decoder = new Mpg123Decoder(filepath);
-	}
-
-	return decoder;
 }
 
 }

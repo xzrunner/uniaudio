@@ -196,6 +196,14 @@
 				RelativePath="..\..\..\include\uniaudio\Decoder.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\source\DecoderFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\DecoderFactory.h"
+				>
+			</File>
 			<Filter
 				Name="mp3"
 				>
@@ -218,10 +226,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\uniaudio\AudioData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\source\Source.cpp"
 				>
 			</File>
 			<File

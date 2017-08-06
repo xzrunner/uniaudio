@@ -16,7 +16,7 @@ public:
 	 * Indicates how many bytes of raw data should be generated at each
 	 * call to Decode.
 	 **/
-	static const int DEFAULT_BUFFER_SIZE = 16384;
+	static const int DEFAULT_BUFFER_SIZE = 2048;
 
 	/**
 	 * Indicates the quality of the sound.
@@ -47,6 +47,8 @@ public:
 	const unsigned char* GetBuffer() const { return m_buf; }
 
 	int GetSampleRate() const { return m_sample_rate; }
+
+	bool IsFinished() const { return m_eof; }
 
 protected:
 	unsigned char* m_buf;

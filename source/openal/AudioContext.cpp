@@ -31,6 +31,11 @@ ua::Source* AudioContext::CreateSource(const AudioData* data)
 	return new Source(m_pool, data);
 }
 
+ua::Source* AudioContext::CreateSource(Decoder* decoder)
+{
+	return new Source(m_pool, decoder);
+}
+
 static void* 
 pool_thread_main(void* arg)
 {

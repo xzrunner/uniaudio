@@ -19,6 +19,7 @@ public:
 	virtual ~AudioContext();
 
 	virtual Source* CreateSource(const AudioData* data);
+	virtual Source* CreateSource(Decoder* decoder);
 
 private:
 	bool Init();

@@ -32,8 +32,6 @@ private:
 
 	void LoadFromList(const std::vector<ua::AudioData*>& list);
 
-	static Decoder* CreateDecoder(const std::string& filepath);
-
 private:
 	uint8_t* m_data;
 	int m_size;

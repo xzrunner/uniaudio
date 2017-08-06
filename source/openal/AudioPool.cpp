@@ -34,7 +34,24 @@ AudioPool::~AudioPool()
 
 void AudioPool::Update()
 {
-//	thread::Lock lock(m_mutex);
+	thread::Lock lock(m_mutex);
+	
+	std::map<Source*, ALuint>::iterator itr = m_playing.begin();
+	for ( ; itr != m_playing.end(); )
+	{
+		Source* source = itr->first;
+		if (source->Update()) {
+			++itr;
+			continue;
+		}
+
+		source->StopImpl();
+		source->RewindImpl();
+		source->RemoveReference();
+		m_available.push(itr->second);
+
+		itr = m_playing.erase(itr);
+	}
 }
 
 bool AudioPool::Play(Source* source, ALuint& out)
