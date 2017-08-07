@@ -50,7 +50,7 @@ void AudioPool::Update()
 		source->RemoveReference();
 		m_available.push(itr->second);
 
-		itr = m_playing.erase(itr);
+		m_playing.erase(itr++);
 	}
 }
 
