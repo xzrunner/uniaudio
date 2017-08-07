@@ -6,6 +6,7 @@
 #include <limits>
 
 #include <string.h>
+#include <stdlib.h>
 
 namespace ua
 {
