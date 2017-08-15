@@ -45,6 +45,7 @@ public:
 	virtual int GetBitDepth() const = 0;
 
 	const unsigned char* GetBuffer() const { return m_buf; }
+	int GetBufferSize() const { return m_buf_size; }
 
 	int GetSampleRate() const { return m_sample_rate; }
 

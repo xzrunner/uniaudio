@@ -1,5 +1,5 @@
-#ifndef _UNIAUDIO_AUDIO_POOL_H_
-#define _UNIAUDIO_AUDIO_POOL_H_
+#ifndef _UNIAUDIO_OPENAL_AUDIO_POOL_H_
+#define _UNIAUDIO_OPENAL_AUDIO_POOL_H_
 
 #include <CU_Uncopyable.h>
 #include <OpenAL/al.h>
@@ -47,4 +47,4 @@ private:
 }
 }
 
-#endif // _UNIAUDIO_AUDIO_POOL_H_
+#endif // _UNIAUDIO_OPENAL_AUDIO_POOL_H_

@@ -25,11 +25,14 @@ AudioPool::AudioPool()
 
 AudioPool::~AudioPool()
 {
+	std::map<Source*, ALuint>::iterator itr = m_playing.begin();
+	for ( ; itr != m_playing.end(); ++itr) {
+		itr->first->RemoveReference();
+	}
 	
+	alDeleteSources(NUM_SOURCES, m_sources);
 
 	delete m_mutex;
-
-	alDeleteSources(NUM_SOURCES, m_sources);
 }
 
 void AudioPool::Update()
