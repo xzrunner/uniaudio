@@ -1,5 +1,7 @@
 #include "uniaudio/opensl/AudioContext.h"
 #include "uniaudio/opensl/AudioPool.h"
+#include "uniaudio/opensl/Source.h"
+#include "uniaudio/DecoderFactory.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -42,7 +44,16 @@ ua::Source* AudioContext::CreateSource(const AudioData* data)
 
 ua::Source* AudioContext::CreateSource(Decoder* decoder)
 {
-	return NULL;
+	return new Source(m_pool, decoder);
+}
+
+ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
+{
+	if (stream) {
+		return new Source(m_pool, filepath);
+	} else {
+		return new Source(m_pool, DecoderFactory::Create(filepath));
+	}
 }
 
 #ifdef __ANDROID__

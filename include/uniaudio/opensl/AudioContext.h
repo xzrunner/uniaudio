@@ -31,6 +31,7 @@ public:
 
 	virtual ua::Source* CreateSource(const AudioData* data);
 	virtual ua::Source* CreateSource(Decoder* decoder);
+	virtual ua::Source* CreateSource(const std::string& filepath, bool stream);
 
 #ifdef __ANDROID__
 	void InitAAssetMgr(JNIEnv* env, jobject assetManager);

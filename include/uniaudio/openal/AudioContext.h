@@ -18,8 +18,9 @@ public:
 	AudioContext();
 	virtual ~AudioContext();
 
-	virtual Source* CreateSource(const AudioData* data);
-	virtual Source* CreateSource(Decoder* decoder);
+	virtual ua::Source* CreateSource(const AudioData* data);
+	virtual ua::Source* CreateSource(Decoder* decoder);
+	virtual ua::Source* CreateSource(const std::string& filepath, bool stream);
 
 private:
 	bool Init();
