@@ -4,12 +4,14 @@
 #include "uniaudio/AudioContext.h"
 
 #include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 
 #ifdef __ANDROID__
 // for native asset manager
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <string>
 #endif // __ANDROID__
 
 namespace ua

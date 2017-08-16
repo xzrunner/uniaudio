@@ -1,5 +1,7 @@
 #include "uniaudio/opensl/AudioQueue.h"
 
+#include <string.h>
+
 namespace ua
 {
 namespace opensl

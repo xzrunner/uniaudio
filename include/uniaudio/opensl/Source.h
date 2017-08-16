@@ -5,6 +5,8 @@
 #include "uniaudio/opensl/AudioQueue.h"
 #include "uniaudio/opensl/AudioPlayer.h"
 
+#include <string>
+
 namespace ua
 {
 
