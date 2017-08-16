@@ -3,6 +3,7 @@
 
 #include "uniaudio/Source.h"
 #include "uniaudio/opensl/AudioQueue.h"
+#include "uniaudio/opensl/AudioPlayer.h"
 
 namespace ua
 {
@@ -17,7 +18,7 @@ class AudioPool;
 class Source : public ua::Source
 {
 public:
-	Source(AudioPool* pool, const AudioData* data);
+	Source(AudioPool* pool, const std::string& filepath);
 	Source(AudioPool* pool, Decoder* decoder);
 	virtual ~Source();
 
@@ -38,36 +39,67 @@ public:
 	void SetLooping(bool looping);
 	bool IsLooping() const { return m_looping; }
 
-	const Decoder* GetDecoder() const { return m_decoder; }
-	AudioQueue* GetBuffers() { return m_bufs; }
+	const Decoder* GetDecoder() const { return m_in_buf.GetDecoder(); }
+	AudioQueue* GetBuffers() { return m_out_buf; }
+
+	const std::string& GetFilepath() const { return m_filepath; }
+
+	void SetPlayer(AssetPlayer* player) { m_player = player; }
+	AssetPlayer* GetPlayer() { return m_player; }
+	
+	AudioPool* GetPool() { return m_pool; }
 
 	bool IsStopped() const;
 	bool IsPaused() const;
 	bool IsFinished() const;
 
+	bool IsStream() const { return m_stream; }
+
 private:
 	void Stream();
-	void ReloadBuffer();
 
 private:
 	static const int QUEUE_BUF_COUNT = 16;
 
 private:
+	class Buffer
+	{
+	public:
+		Buffer(Decoder* decoder);
+		~Buffer();
+
+		void Output(AudioQueue* out, bool looping);
+
+		bool IsDecoderFinished() const;
+		void DecoderRewind();
+
+		const Decoder* GetDecoder() const { return m_decoder; }
+
+	private:
+		void Reload(bool looping);
+
+	private:
+		Decoder* m_decoder;
+		int m_size, m_used;
+
+	}; // Buffer
+
+private:
 	AudioPool* m_pool;
-
-	Decoder* m_decoder;
-
-	const bool m_stream;
 
 	bool m_looping;
 	bool m_active;
 	bool m_paused;
 
-	AudioQueue* m_bufs;
+	const bool m_stream;
 
-	// decoder's
-	unsigned char* m_buf;
-	int m_buf_sz, m_buf_used;
+	// stream
+	Buffer      m_in_buf;
+	AudioQueue* m_out_buf;
+
+	// asset
+	std::string  m_filepath;
+	AssetPlayer* m_player;
 
 }; // Source
 

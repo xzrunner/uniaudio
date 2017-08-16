@@ -2,6 +2,7 @@
 #define _UNIAUDIO_OPENSL_AUDIO_POOL_H_
 
 #include <uniaudio/opensl/AudioMixer.h>
+#include <uniaudio/opensl/AudioPlayer.h>
 
 #include <CU_Uncopyable.h>
 
@@ -9,6 +10,7 @@
 #include <SLES/OpenSLES_Android.h>
 
 #include <set>
+#include <queue>
 
 namespace ua
 {
@@ -38,6 +40,7 @@ public:
 	void ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq);
 
 private:
+	void CreateAssetsAudioPlayer();
 	bool CreateBufferQueueAudioPlayer();
 
 	void EnqueueAllBuffers();
@@ -46,22 +49,23 @@ private:
 	static const int NUM_OPENSL_BUFFERS = 2;
 
 private:
+	bool InitAssetsAudioPlayer(AssetPlayer* player, const Source* source);
+
+private:
 	thread::Mutex* m_mutex;
 
 	AudioContext* m_ctx;
 
-	// sles
-	SLObjectItf		m_bq_player_obj;
-	SLPlayItf		m_bq_player_play;
-	SLAndroidSimpleBufferQueueItf m_bq_player_buffer_queue;
-	SLEffectSendItf m_bq_player_effect_send;
-	SLMuteSoloItf	m_bq_player_mute_solo;
-	SLVolumeItf		m_bq_player_volume;
-	SLmilliHertz	m_bq_player_sample_rate;
-
-	AudioMixer m_mixer;
-
 	std::set<Source*> m_playing;
+
+	// asset
+	static const int NUM_ASSET_PLAYERS = 16;
+	std::queue<AssetPlayer*> m_asset_player_freelist;
+
+	// queue
+	QueuePlayer m_queue_player;
+	
+	AudioMixer m_mixer;
 
 }; // AudioPool
 

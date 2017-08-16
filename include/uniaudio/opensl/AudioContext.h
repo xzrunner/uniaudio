@@ -4,10 +4,13 @@
 #include "uniaudio/AudioContext.h"
 
 #include <SLES/OpenSLES.h>
-//#include <SLES/OpenSLES_Android.h>
 
-// #include <sys/types.h>
-// #include <android/asset_manager.h>
+#ifdef __ANDROID__
+// for native asset manager
+#include <sys/types.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#endif // __ANDROID__
 
 namespace ua
 {
@@ -27,10 +30,12 @@ public:
 	virtual ua::Source* CreateSource(const AudioData* data);
 	virtual ua::Source* CreateSource(Decoder* decoder);
 
-//	void InitAAssetMgr(JNIEnv* env, jobject assetManager);
+#ifdef __ANDROID__
+	void InitAAssetMgr(JNIEnv* env, jobject assetManager);
+	bool LoadAssetFile(const std::string& filepath, SLDataLocator_AndroidFD* loc_fd);
+#endif // __ANDROID__
 
 	SLEngineItf GetEngine() { return m_engine_engine; }
-	
 	SLObjectItf GetOutputMix() { return m_output_mix_obj; }
 
 public:
@@ -55,8 +60,9 @@ private:
 	// aux effect on the output mix, used by the buffer queue player
 	static const SLEnvironmentalReverbSettings m_reverb_settings;
 
-// 	// android
-// 	AAssetManager* m_aasset_mgr;
+#ifdef __ANDROID__
+ 	AAssetManager* m_aasset_mgr;
+#endif // __ANDROID__
 
 }; // AudioContext
 

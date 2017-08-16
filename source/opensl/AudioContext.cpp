@@ -26,7 +26,13 @@ AudioContext::AudioContext()
 
 AudioContext::~AudioContext()
 {
-
+	if (m_engine_obj) {
+		(*m_engine_obj)->Destroy(m_engine_obj);
+	}
+	if (m_output_mix_obj) {
+		(*m_output_mix_obj)->Destroy(m_output_mix_obj);
+	}
+	delete m_pool;
 }
 
 ua::Source* AudioContext::CreateSource(const AudioData* data)
@@ -39,10 +45,33 @@ ua::Source* AudioContext::CreateSource(Decoder* decoder)
 	return NULL;
 }
 
-//void AudioContext::InitAAssetMgr(JNIEnv* env, jobject assetManager)
-//{
-//	m_aasset_mgr = AAssetManager_fromJava(env, assetManager);
-//}
+#ifdef __ANDROID__
+
+void AudioContext::InitAAssetMgr(JNIEnv* env, jobject assetManager)
+{
+	m_aasset_mgr = AAssetManager_fromJava(env, assetManager);
+}
+
+bool AudioContext::LoadAssetFile(const std::string& filepath, SLDataLocator_AndroidFD* loc_fd)
+{
+	AAsset* asset = AAssetManager_open(m_aasset_mgr, filepath.c_str(), AASSET_MODE_UNKNOWN);
+	if (!asset) {
+		return false;
+	}
+
+	off_t start, length;
+	int fd = AAsset_openFileDescriptor(asset, &start, &length);
+	AAsset_close(asset);
+	if (fd < 0) {
+		return false;
+	}
+	SLDataLocator_AndroidFD _loc_fd = {SL_DATALOCATOR_ANDROIDFD, fd, start, length};
+	*loc_fd = _loc_fd;
+	
+	return true;
+}
+
+#endif // __ANDROID__
 
 bool AudioContext::CreateEngine()
 {

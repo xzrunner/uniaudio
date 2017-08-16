@@ -10,42 +10,34 @@ namespace ua
 namespace opensl
 {
 
-Source::Source(AudioPool* pool, const AudioData* data)
+Source::Source(AudioPool* pool, const std::string& filepath)
 	: m_pool(pool)
-	, m_decoder(NULL)
-	, m_stream(false)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
-	, m_bufs(NULL)
-	, m_buf(NULL)
-	, m_buf_sz(0)
-	, m_buf_used(0)
+	, m_stream(false)
+	, m_in_buf(NULL)
+	, m_out_buf(NULL)
+	, m_filepath(filepath)
+	, m_player(NULL)
 {
-	// todo
 }
 
 Source::Source(AudioPool* pool, Decoder* decoder)
 	: m_pool(pool)
-	, m_decoder(decoder)
-	, m_stream(true)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
-	, m_buf(NULL)
-	, m_buf_sz(0)
-	, m_buf_used(0)
+	, m_stream(true)
+	, m_in_buf(decoder)
+	, m_player(NULL)
 {
-	m_decoder->AddReference();
-
 	const int HZ = decoder->GetSampleRate();
 	const int depth = decoder->GetBitDepth();
 	const int channels = decoder->GetChannels();
 	const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 	int buf_sz = depth * channels * samples / 8;
-	m_bufs = new AudioQueue(QUEUE_BUF_COUNT, buf_sz);
-
-	m_buf = new unsigned char[m_decoder->GetBufferSize()];
+	m_out_buf = new AudioQueue(QUEUE_BUF_COUNT, buf_sz);
 }
 
 Source::~Source()
@@ -53,14 +45,8 @@ Source::~Source()
 	if (m_active) {
 		m_pool->Stop(this);
 	}
-	if (m_buf) {
-		delete[] m_buf;
-	}
-	if (m_bufs) {
-		delete m_bufs;
-	}
-	if (m_decoder) {
-		m_decoder->RemoveReference();
+	if (m_out_buf) {
+		delete m_out_buf;
 	}
 }
 
@@ -95,7 +81,6 @@ void Source::Play()
 #endif // FORCE_REPLAY
 		return;
 	}
-
 	m_active = m_pool->Play(this);
 }
 
@@ -125,11 +110,11 @@ void Source::PlayImpl()
 {
 	if (m_stream)
 	{
-		// 
 	}
 	else
 	{
-		// todo
+		assert(m_player && m_player->play);
+		(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_PLAYING);
 	}
 
 	m_active = true;
@@ -137,32 +122,53 @@ void Source::PlayImpl()
 
 void Source::StopImpl()
 {
-	if (m_active)
+	if (!m_active) {
+		return;
+	}
+
+	if (m_stream)
 	{
-		if (m_stream)
-		{
-			//
-		}
-		else
-		{
-			// todo
-		}
+	}
+	else
+	{
+		assert(m_player && m_player->play);
+		(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_STOPPED);
 	}
 	m_active = false;
 }
 
 void Source::PauseImpl()
 {
-	if (m_active) {
-		m_paused = true;
+	if (!m_active) {
+		return;
 	}
+
+	if (m_stream) 
+	{
+	}
+	else
+	{
+		assert(m_player && m_player->play);
+		(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_PAUSED);
+	}
+	m_paused = true;
 }
 
 void Source::ResumeImpl()
 {
-	if (m_active && m_paused) {
-		m_paused = false;
+	if (!m_active || !m_paused) {
+		return;
 	}
+
+	if (m_stream)
+	{
+	}
+	else
+	{
+		assert(m_player && m_player->play);
+		(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_PLAYING);
+	}
+	m_paused = false;
 }
 
 void Source::RewindImpl()
@@ -172,7 +178,7 @@ void Source::RewindImpl()
 		if (m_stream)
 		{
 			bool paused = m_paused;
-			m_decoder->Rewind();
+			m_in_buf.DecoderRewind();
 			StopImpl();
 			PlayImpl();
 			if (paused) {
@@ -181,14 +187,16 @@ void Source::RewindImpl()
 		}
 		else
 		{
-
+			assert(m_player && m_player->play);
+			(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_STOPPED);
+			(*m_player->play)->SetPlayState(m_player->play, SL_PLAYSTATE_PLAYING);
 		}
 	}
 	else
 	{
 		if (m_stream)
 		{
-			m_decoder->Rewind();
+			m_in_buf.DecoderRewind();
 		}
 	}
 }
@@ -206,46 +214,88 @@ bool Source::IsPaused() const
 bool Source::IsFinished() const
 {
 	if (m_stream) {
-		return IsStopped() && !IsLooping() && m_decoder->IsFinished();
+		return IsStopped() && !IsLooping() && m_in_buf.IsDecoderFinished();
 	} else {
 		return IsStopped();
 	}
 }
 
-void Source::ReloadBuffer()
+void Source::Stream()
 {
-	m_buf_sz = m_decoder->Decode();
-	assert(m_buf_sz <= m_decoder->GetBufferSize());	
-	m_buf_used = 0;
-	memcpy(m_buf, m_decoder->GetBuffer(), m_buf_sz);
-	if (m_decoder->IsFinished() && IsLooping()) {
-		m_decoder->Rewind();
+	m_in_buf.Output(m_out_buf, IsLooping());
+}
+
+/************************************************************************/
+/* class Source::Buffer                                                 */
+/************************************************************************/
+
+Source::Buffer::
+Buffer(Decoder* decoder)
+	: m_decoder(decoder)
+	, m_used(0)
+{
+	if (m_decoder) {
+		m_decoder->AddReference();
 	}
 }
 
-void Source::Stream()
+Source::Buffer::
+~Buffer()
 {
-	if (m_buf_sz == 0 || m_buf_used == m_buf_sz) {
-		ReloadBuffer();
+	if (m_decoder) {
+		m_decoder->RemoveReference();
 	}
-	if (m_buf_sz == 0) {
+}
+
+void Source::Buffer::
+Output(AudioQueue* out, bool looping)
+{
+	if (m_size == 0 || m_used == m_size) {
+		Reload(looping);
+	}
+	if (m_size == 0) {
 		return;
 	}
 
 	while (true)
 	{
-		int left = m_buf_sz - m_buf_used;
-		int sz = m_bufs->Filling(&m_buf[m_buf_used], left);
+		int left = m_size - m_used;
+		int sz = out->Filling(&m_decoder->GetBuffer()[m_used], left);
 		assert(sz <= left);
 		if (sz < left) {
-			m_buf_used += sz;
+			m_used += sz;
 			break;
 		} else if (sz == left) {
-			ReloadBuffer();
-			if (m_buf_sz == 0) {
+			Reload(looping);
+			if (m_size == 0) {
 				break;
 			}
 		}
+	}
+}
+
+bool Source::Buffer::
+IsDecoderFinished() const
+{
+	return m_decoder ? m_decoder->IsFinished() : true;
+}
+
+void Source::Buffer::
+DecoderRewind()
+{
+	if (m_decoder) {
+		m_decoder->Rewind();
+	}
+}
+
+void Source::Buffer::
+Reload(bool looping)
+{
+	m_size = m_decoder->Decode();
+	assert(m_size <= m_decoder->GetBufferSize());	
+	m_used = 0;
+	if (m_decoder->IsFinished() && looping) {
+		m_decoder->Rewind();
 	}
 }
 

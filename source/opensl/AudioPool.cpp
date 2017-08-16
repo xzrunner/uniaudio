@@ -14,21 +14,24 @@ namespace opensl
 
 AudioPool::AudioPool(AudioContext* ctx)
 	: m_ctx(ctx)
-	, m_bq_player_obj(NULL)
-	, m_bq_player_sample_rate(0)
 {
 	m_mutex = new thread::Mutex();
 
-	CreateBufferQueueAudioPlayer();
+	CreateAssetsAudioPlayer();
 
+	CreateBufferQueueAudioPlayer();
 	EnqueueAllBuffers();
 }
 
 AudioPool::~AudioPool()
 {
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->RemoveReference();
+	Stop();
+	assert(m_playing.empty());
+
+	while (!m_asset_player_freelist.empty()) {
+		AssetPlayer* player = m_asset_player_freelist.front();
+		delete player;
+		m_asset_player_freelist.pop();
 	}
 
 	delete m_mutex;
@@ -51,6 +54,12 @@ void AudioPool::Update()
 			continue;
 		}
 
+		if (!source->IsStream()) {
+			AssetPlayer* player = source->GetPlayer();
+			assert(player);
+			m_asset_player_freelist.push(player);
+		}
+
 		source->StopImpl();
 		source->RewindImpl();
 		source->RemoveReference();
@@ -68,6 +77,19 @@ bool AudioPool::Play(Source* source)
 		return true;
 	}
 
+	if (!source->IsStream()) 
+	{
+		if (m_asset_player_freelist.empty()) {
+			return false;
+		}
+
+		AssetPlayer* player = m_asset_player_freelist.front();
+		m_asset_player_freelist.pop();
+		InitAssetsAudioPlayer(player, source);
+
+		source->SetPlayer(player);	
+	}
+	
 	m_playing.insert(source);
 	source->AddReference();
 
@@ -79,11 +101,20 @@ bool AudioPool::Play(Source* source)
 void AudioPool::Stop()
 {
 	thread::Lock lock(m_mutex);
+
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
-		(*itr)->StopImpl();
-		(*itr)->RemoveReference();
+		Source* s = *itr;
+		if (!s->IsStream()) 
+		{
+			AssetPlayer* player = s->GetPlayer();
+			assert(player);
+			player->Release();
+			m_asset_player_freelist.push(player);
+		}
+		s->StopImpl();
+		s->RemoveReference();
 	}
 	m_playing.clear();
 }
@@ -93,12 +124,21 @@ void AudioPool::Stop(Source* source)
 	thread::Lock lock(m_mutex);
 
 	std::set<Source*>::iterator itr = m_playing.find(source);
-	if (itr != m_playing.end())
-	{
-		source->StopImpl();
-		m_playing.erase(itr);
-		source->RemoveReference();
+	if (itr == m_playing.end()) {
+		return;
 	}
+
+	if (!source->IsStream())
+	{
+		AssetPlayer* player = source->GetPlayer();
+		assert(player);
+		player->Release();
+		m_asset_player_freelist.push(player);
+	}
+
+	source->StopImpl();
+	m_playing.erase(itr);
+	source->RemoveReference();
 }
 
 void AudioPool::Pause()
@@ -154,7 +194,7 @@ void AudioPool::Rewind(Source* source)
 
 void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 {
-	assert(bq ==  m_bq_player_buffer_queue);
+	assert(bq == m_queue_player.queue);
 	if (m_playing.empty()) {
 		return;
 	}
@@ -164,7 +204,7 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 	for ( ; itr != m_playing.end(); ++itr)
 	{
 		Source* source = *itr;
-		if (source->IsStopped() || source->IsPaused()) {
+		if (!source->IsStream() || source->IsStopped() || source->IsPaused()) {
 			continue;
 		}
 
@@ -186,7 +226,14 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 
 	int16_t* buf = m_mixer.Output();
 	int buf_sz = m_mixer.GetBufSize();
-	(*m_bq_player_buffer_queue)->Enqueue(m_bq_player_buffer_queue, buf, buf_sz);
+	(*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
+}
+
+void AudioPool::CreateAssetsAudioPlayer()
+{
+	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i) {
+		m_asset_player_freelist.push(new AssetPlayer);
+	}
 }
 
 // this callback handler is called every time a buffer finishes playing
@@ -208,8 +255,8 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
      * Enable Fast Audio when possible:  once we set the same rate to be the native, fast audio path
      * will be triggered
      */
-    if(m_bq_player_sample_rate) {
-        format_pcm.samplesPerSec = m_bq_player_sample_rate;       //sample rate in mili second
+    if(m_queue_player.sample_rate) {
+        format_pcm.samplesPerSec = m_queue_player.sample_rate;       //sample rate in mili second
     }
     SLDataSource audioSrc = {&loc_bufq, &format_pcm};
 
@@ -227,37 +274,37 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
                                    /*SL_BOOLEAN_TRUE,*/ };
 
-	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &m_bq_player_obj, &audioSrc, &audioSnk,
-		m_bq_player_sample_rate? 2 : 3, ids, req);
+	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &m_queue_player.object, &audioSrc, &audioSnk,
+		m_queue_player.sample_rate? 2 : 3, ids, req);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
 	// realize the player
-	result = (*m_bq_player_obj)->Realize(m_bq_player_obj, SL_BOOLEAN_FALSE);
+	result = (*m_queue_player.object)->Realize(m_queue_player.object, SL_BOOLEAN_FALSE);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
-	// get the play interface
-	result = (*m_bq_player_obj)->GetInterface(m_bq_player_obj, SL_IID_PLAY, &m_bq_player_play);
+	// get the m_queue_player.play interface
+	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_PLAY, &m_queue_player.play);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
-	// get the buffer queue interface
-	result = (*m_bq_player_obj)->GetInterface(m_bq_player_obj, SL_IID_BUFFERQUEUE,
-		&m_bq_player_buffer_queue);
+	// get the buffer m_queue_player.queue interface
+	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_BUFFERQUEUE,
+		&m_queue_player.queue);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
-	// register callback on the buffer queue
-	result = (*m_bq_player_buffer_queue)->RegisterCallback(m_bq_player_buffer_queue, bqPlayerCallback, this);
+	// register callback on the buffer m_queue_player.queue
+	result = (*m_queue_player.queue)->RegisterCallback(m_queue_player.queue, bqPlayerCallback, this);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
 	// get the effect send interface
-	m_bq_player_effect_send = NULL;
-	if( 0 == m_bq_player_sample_rate) {
-		result = (*m_bq_player_obj)->GetInterface(m_bq_player_obj, SL_IID_EFFECTSEND,
-			&m_bq_player_effect_send);
+	m_queue_player.effect_send = NULL;
+	if( 0 == m_queue_player.sample_rate) {
+		result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_EFFECTSEND,
+			&m_queue_player.effect_send);
 		assert(SL_RESULT_SUCCESS == result);
 		(void)result;
 	}
@@ -269,13 +316,13 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 	(void)result;
 #endif
 
-	// get the volume interface
-	result = (*m_bq_player_obj)->GetInterface(m_bq_player_obj, SL_IID_VOLUME, &m_bq_player_volume);
+	// get the m_queue_player.volume interface
+	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_VOLUME, &m_queue_player.volume);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
 	// set the player's state to playing
-	result = (*m_bq_player_play)->SetPlayState(m_bq_player_play, SL_PLAYSTATE_PLAYING);
+	result = (*m_queue_player.play)->SetPlayState(m_queue_player.play, SL_PLAYSTATE_PLAYING);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
@@ -289,11 +336,80 @@ void AudioPool::EnqueueAllBuffers()
 	memset(buf, 0, buf_sz);
 	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i)
 	{
- 		SLresult result = (*m_bq_player_buffer_queue)->Enqueue(m_bq_player_buffer_queue, buf, buf_sz);
+ 		SLresult result = (*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
  		if (SL_RESULT_SUCCESS != result) {
 			return;
  		}
 	}
+}
+
+static void asset_player_cb(SLPlayItf caller, void* context, SLuint32 play_event)
+{
+	Source* source = static_cast<Source*>(context);
+	AudioPool* pool = source->GetPool();
+	pool->Stop(source);
+}
+
+bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const Source* source)
+{
+	SLresult result;
+
+	SLDataLocator_AndroidFD loc_fd;
+#ifdef __ANDROID__
+	bool loaded = m_ctx->LoadAssetFile(source->GetFilepath(), &loc_fd);
+	if (!loaded) {
+		return false;
+	}
+#endif // __ANDROID__
+
+	SLDataFormat_MIME format_mime = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
+	SLDataSource audioSrc = {&loc_fd, &format_mime};
+
+	// configure audio sink
+	SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, m_ctx->GetOutputMix()};
+	SLDataSink audioSnk = {&loc_outmix, NULL};
+
+	// create audio player
+	const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
+	const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &player->object, &audioSrc, &audioSnk,
+		3, ids, req);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// realize the player
+	result = (*player->object)->Realize(player->object, SL_BOOLEAN_FALSE);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// get the play interface
+	result = (*player->object)->GetInterface(player->object, SL_IID_PLAY, &player->play);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// get the seek interface
+	result = (*player->object)->GetInterface(player->object, SL_IID_SEEK, &player->seek);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// get the mute/solo interface
+	result = (*player->object)->GetInterface(player->object, SL_IID_MUTESOLO, &player->mute_solo);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// get the volume interface
+	result = (*player->object)->GetInterface(player->object, SL_IID_VOLUME, &player->volume);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	// enable whole file looping
+	result = (*player->seek)->SetLoop(player->seek, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);
+	assert(SL_RESULT_SUCCESS == result);
+	(void)result;
+
+	(*player->play)->RegisterCallback(player->play, asset_player_cb, const_cast<Source*>(source));
+
+	return result == SL_RESULT_SUCCESS;
 }
 
 }
