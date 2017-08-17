@@ -32,7 +32,7 @@ public:
 	SLObjectItf                   object;
 	SLPlayItf		              play;
 	SLAndroidSimpleBufferQueueItf queue;
-	SLEffectSendItf               effect_send;
+//	SLEffectSendItf               effect_send;
 	SLMuteSoloItf                 mute_solo;
 	SLVolumeItf                   volume;
 	SLmilliHertz                  sample_rate;

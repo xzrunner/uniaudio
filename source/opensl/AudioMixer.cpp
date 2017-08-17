@@ -11,6 +11,7 @@ namespace opensl
 {
 
 AudioMixer::AudioMixer()
+	: m_dirty(false)
 {
 	m_samples = static_cast<int>(DEFAULT_SAMPLE_RATE * AudioContext::BUFFER_TIME_LEN);
 	m_mix_buffer = new int32_t[m_samples * DEFAULT_CHANNELS];
@@ -35,10 +36,51 @@ AudioMixer::~AudioMixer()
 
 void AudioMixer::Input(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel)
 {
+	m_dirty = true;
+	MixFast(buf, buf_sz, sample_rate, bit_depth, channel);
+}
+
+void AudioMixer::MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel)
+{
+	// simple up-sampling, must be divisible
+	if (DEFAULT_SAMPLE_RATE % sample_rate) {
+		return;
+	}
+
+	int up_sample_rate = DEFAULT_SAMPLE_RATE / sample_rate;
+	if (channel == 1) {
+		up_sample_rate *= 2;
+	}
+
+	int32_t* dst_ptr = m_mix_buffer;
+	if (bit_depth == 8)
+	{
+		const int8_t* src_ptr = reinterpret_cast<const int8_t*>(buf);
+		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i) {
+			for (int j = 0; j < up_sample_rate; ++j) {
+				*dst_ptr++ = *src_ptr;
+			}
+			++src_ptr;
+		}
+	}
+	else if (bit_depth == 16)
+	{
+		const int16_t* src_ptr = reinterpret_cast<const int16_t*>(buf);
+		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i) {
+			for (int j = 0; j < up_sample_rate; ++j) {
+				*dst_ptr++ = *src_ptr;
+			}
+			++src_ptr;
+		}
+	}
+}
+
+void AudioMixer::MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel)
+{
 	assert((bit_depth == 8 || bit_depth == 16)
 		&& (channel == 1 || channel == 2));
 
- 	const int src_samples = buf_sz / bit_depth / channel;
+	const int src_samples = buf_sz / bit_depth / channel;
 	const int dst_samples = src_samples * DEFAULT_SAMPLE_RATE / sample_rate;
 	int32_t* ptr = m_mix_buffer;
 	if (channel == 1)
@@ -93,10 +135,19 @@ void AudioMixer::Input(const uint8_t* buf, int buf_sz, int sample_rate, int bit_
 
 int16_t* AudioMixer::Output()
 {
-	for (int i = 0; i < m_samples; ++i) {
-		m_out_buffer[i] = std::min(std::max(-32768, m_mix_buffer[i]), 32767);
+	if (m_dirty) {
+		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i) {
+			m_out_buffer[i] = std::min(std::max(-32768, m_mix_buffer[i]), 32767);
+		}
 	}
 	return m_out_buffer;
+}
+
+void AudioMixer::Reset()
+{
+	m_dirty = false;
+	memset(m_mix_buffer, 0, sizeof(int32_t) * m_samples * DEFAULT_CHANNELS);
+	memset(m_out_buffer, 0, sizeof(int16_t) * m_samples * DEFAULT_CHANNELS);
 }
 
 }

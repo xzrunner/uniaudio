@@ -89,7 +89,7 @@ bool AudioPool::Play(Source* source)
 
 		source->SetPlayer(player);	
 	}
-	
+
 	m_playing.insert(source);
 	source->AddReference();
 
@@ -195,11 +195,9 @@ void AudioPool::Rewind(Source* source)
 void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 {
 	assert(bq == m_queue_player.queue);
-	if (m_playing.empty()) {
-		return;
-	}
 
-	bool no_data = true;
+	m_mixer.Reset();
+
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
@@ -209,19 +207,12 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 		}
 
 		const Decoder* decoder = source->GetDecoder();
-
 		AudioQueue* bufs = source->GetBuffers();
 		int buf_sz;
-		const unsigned char* buf = bufs->Top(buf_sz);
+		const unsigned char* buf = bufs->Pop(buf_sz);
 		if (buf != NULL) {
-			no_data = false;
 			m_mixer.Input(buf, buf_sz, decoder->GetSampleRate(), decoder->GetBitDepth(), decoder->GetChannels());
 		}
-		bufs->Pop();
-	}
-
-	if (no_data) {
-		return;
 	}
 
 	int16_t* buf = m_mixer.Output();
@@ -248,9 +239,10 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 
     // configure audio source
     SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, NUM_OPENSL_BUFFERS};
-    SLDataFormat_PCM format_pcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_8,
+	// configure a typical audio source of 44.1 kHz stereo 16-bit little endian
+    SLDataFormat_PCM format_pcm = {SL_DATAFORMAT_PCM, 2, SL_SAMPLINGRATE_44_1,
         SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
-        SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
+        SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT, SL_BYTEORDER_LITTLEENDIAN};
     /*
      * Enable Fast Audio when possible:  once we set the same rate to be the native, fast audio path
      * will be triggered
@@ -274,8 +266,7 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
                                    /*SL_BOOLEAN_TRUE,*/ };
 
-	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &m_queue_player.object, &audioSrc, &audioSnk,
-		m_queue_player.sample_rate? 2 : 3, ids, req);
+	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &m_queue_player.object, &audioSrc, &audioSnk, 2, ids, req);
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
@@ -300,14 +291,14 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 	assert(SL_RESULT_SUCCESS == result);
 	(void)result;
 
-	// get the effect send interface
-	m_queue_player.effect_send = NULL;
-	if( 0 == m_queue_player.sample_rate) {
-		result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_EFFECTSEND,
-			&m_queue_player.effect_send);
-		assert(SL_RESULT_SUCCESS == result);
-		(void)result;
-	}
+// 	// get the effect send interface
+// 	m_queue_player.effect_send = NULL;
+// 	if( 0 == m_queue_player.sample_rate) {
+// 		result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_EFFECTSEND,
+// 			&m_queue_player.effect_send);
+// 		assert(SL_RESULT_SUCCESS == result);
+// 		(void)result;
+// 	}
 
 #if 0   // mute/solo is not supported for sources that are known to be mono, as this is
 	// get the mute/solo interface
@@ -331,16 +322,17 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 
 void AudioPool::EnqueueAllBuffers()
 {
-	void* buf = reinterpret_cast<void*>(m_mixer.Output());
 	int buf_sz = m_mixer.GetBufSize();
+	void* buf = malloc(buf_sz);
 	memset(buf, 0, buf_sz);
-	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i)
-	{
+	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i) {
  		SLresult result = (*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
  		if (SL_RESULT_SUCCESS != result) {
+			free(buf);
 			return;
  		}
 	}
+	free(buf);
 }
 
 static void asset_player_cb(SLPlayItf caller, void* context, SLuint32 play_event)

@@ -2,6 +2,7 @@
 #define _UNIAUDIO_OPENSL_AUDIO_CONTEXT_H_
 
 #include "uniaudio/AudioContext.h"
+#include "uniaudio/Thread.h"
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -66,6 +67,8 @@ private:
 #ifdef __ANDROID__
  	AAssetManager* m_aasset_mgr;
 #endif // __ANDROID__
+
+	thread::Thread* m_pool_thread;
 
 }; // AudioContext
 

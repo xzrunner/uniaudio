@@ -260,7 +260,7 @@ Output(AudioQueue* out, bool looping)
 	while (true)
 	{
 		int left = m_size - m_used;
-		int sz = out->Filling(&m_decoder->GetBuffer()[m_used], left);
+		int sz = out->Push(&m_decoder->GetBuffer()[m_used], left);
 		assert(sz <= left);
 		if (sz < left) {
 			m_used += sz;

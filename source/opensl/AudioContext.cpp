@@ -15,15 +15,29 @@ const float AudioContext::BUFFER_TIME_LEN = 0.01f;
 
 const SLEnvironmentalReverbSettings AudioContext::m_reverb_settings = SL_I3DL2_ENVIRONMENT_PRESET_STONECORRIDOR;
 
+static void* 
+pool_thread_main(void* arg)
+{
+	while (true)
+	{
+		AudioPool* pool = static_cast<AudioPool*>(arg);
+		pool->Update();
+		thread::Thread::Delay(5);
+	}
+}
+
 AudioContext::AudioContext()
 	: m_engine_obj(NULL)
 	, m_engine_engine(NULL)
 	, m_output_mix_obj(NULL)
 	, m_output_mix_env_reverb(NULL)
+	, m_pool_thread(NULL)
 {
 	CreateEngine();
 
 	m_pool = new AudioPool(this);
+
+	m_pool_thread = new thread::Thread(pool_thread_main, m_pool);
 }
 
 AudioContext::~AudioContext()
@@ -35,6 +49,7 @@ AudioContext::~AudioContext()
 		(*m_output_mix_obj)->Destroy(m_output_mix_obj);
 	}
 	delete m_pool;
+	delete m_pool_thread;
 }
 
 ua::Source* AudioContext::CreateSource(const AudioData* data)
@@ -50,9 +65,9 @@ ua::Source* AudioContext::CreateSource(Decoder* decoder)
 ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
 {
 	if (stream) {
-		return new Source(m_pool, filepath);
-	} else {
 		return new Source(m_pool, DecoderFactory::Create(filepath));
+	} else {
+		return new Source(m_pool, filepath);
 	}
 }
 

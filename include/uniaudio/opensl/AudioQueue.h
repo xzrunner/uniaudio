@@ -9,6 +9,7 @@
 
 namespace ua
 {
+namespace thread { class Mutex; }
 namespace opensl
 {
 
@@ -18,10 +19,9 @@ public:
 	AudioQueue(int count, int size);
 	~AudioQueue();
 
-	int Filling(const unsigned char* buf, int buf_sz);
+	int Push(const unsigned char* buf, int buf_sz);
 
-	const unsigned char* Top(int& sz) const; 
-	void Pop();
+	const unsigned char* Pop(int& sz); 
 
 private:
 	void Init(int count, int size);
@@ -35,7 +35,11 @@ private:
 	};
 
 private:
+	thread::Mutex* m_mutex;
+
  	std::list<Buffer*> m_bufs;
+
+	bool m_full;
 
 }; // AudioQueue
 

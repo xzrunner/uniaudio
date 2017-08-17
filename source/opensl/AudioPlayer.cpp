@@ -46,10 +46,10 @@ QueuePlayer::QueuePlayer()
 	: object(NULL)
 	, play(NULL)
 	, queue(NULL)
-	, effect_send(NULL)
+//	, effect_send(NULL)
 	, mute_solo(NULL)
 	, volume(0)
-	, sample_rate(0)
+	, sample_rate(SL_SAMPLINGRATE_44_1)
 {
 }
 

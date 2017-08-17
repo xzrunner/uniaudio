@@ -1,6 +1,8 @@
 #include "uniaudio/opensl/AudioQueue.h"
+#include "uniaudio/Thread.h"
 
 #include <string.h>
+#include <assert.h>
 
 namespace ua
 {
@@ -8,7 +10,10 @@ namespace opensl
 {
 
 AudioQueue::AudioQueue(int count, int size)
+	: m_full(false)
 {
+	m_mutex = new thread::Mutex();
+
 	Init(count, size);
 }
 
@@ -18,10 +23,18 @@ AudioQueue::~AudioQueue()
 	for ( ; itr != m_bufs.end(); ++itr) {
 		delete *itr;
 	}
+
+	delete m_mutex;
 }
 
-int AudioQueue::Filling(const unsigned char* buf, int buf_sz)
+int AudioQueue::Push(const unsigned char* buf, int buf_sz)
 {
+	thread::Lock lock(m_mutex);
+
+	if (m_full) {
+		return 0;
+	}
+
 	int fill_sz = 0;
 
 	const unsigned char* ptr = buf;
@@ -32,9 +45,9 @@ int AudioQueue::Filling(const unsigned char* buf, int buf_sz)
 		if (dst->size >= dst->cap) {
 			continue;
 		}
-
 		int sz = std::min(static_cast<int>(dst->cap - dst->size), buf_sz - fill_sz);
-		memcpy(dst, ptr, sz);
+		memcpy(&dst->buf[dst->size], ptr, sz);
+		dst->size += sz;
 		ptr += sz;
 		fill_sz += sz;
 		if (fill_sz >= buf_sz) {
@@ -42,27 +55,29 @@ int AudioQueue::Filling(const unsigned char* buf, int buf_sz)
 		}
 	}
 
+	if (fill_sz == 0) {
+		m_full = true;
+	}
+
 	return fill_sz;
 }
 
-const unsigned char* AudioQueue::Top(int& sz) const
+const unsigned char* AudioQueue::Pop(int& sz)
 {
-	Buffer* buf = m_bufs.front();
-	if (buf->size == 0) {
-		sz = 0;
-		return NULL;
-	} else {
-		sz = buf->size;
-		return buf->buf;
-	}
-}
+	thread::Lock lock(m_mutex);
 
-void AudioQueue::Pop()
-{
 	Buffer* buf = m_bufs.front();
+
+	sz = buf->size;
+	const unsigned char* ret = sz == 0 ? NULL : buf->buf;
+
+	// move to end
 	m_bufs.pop_front();
 	buf->size = 0;
 	m_bufs.push_back(buf);
+	m_full = false;
+
+	return ret;
 }
 
 void AudioQueue::Init(int count, int size)
