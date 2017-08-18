@@ -3,6 +3,8 @@
 #include "uniaudio/opensl/Source.h"
 #include "uniaudio/Thread.h"
 #include "uniaudio/Decoder.h"
+#include "uniaudio/InputBuffer.h"
+#include "uniaudio/OutputBuffer.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -14,6 +16,7 @@ namespace opensl
 
 AudioPool::AudioPool(AudioContext* ctx)
 	: m_ctx(ctx)
+	, m_queue_mixer(AudioContext::BUFFER_TIME_LEN)
 {
 	m_mutex = new thread::Mutex();
 
@@ -196,7 +199,7 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 {
 	assert(bq == m_queue_player.queue);
 
-	m_mixer.Reset();
+	m_queue_mixer.Reset();
 
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
@@ -206,17 +209,26 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 			continue;
 		}
 
-		const Decoder* decoder = source->GetDecoder();
-		AudioQueue* bufs = source->GetBuffers();
+		OutputBuffer* obuf = source->GetOutputBuffer();
+		assert(obuf);
 		int buf_sz;
-		const unsigned char* buf = bufs->Pop(buf_sz);
-		if (buf != NULL) {
-			m_mixer.Input(buf, buf_sz, decoder->GetSampleRate(), decoder->GetBitDepth(), decoder->GetChannels());
+		const unsigned char* buf = obuf->Output(buf_sz);
+		if (!buf) {
+			continue;
 		}
+
+		const InputBuffer* ibuf = source->GetInputBuffer();
+		assert(ibuf);
+		const Decoder* decoder = ibuf->GetDecoder();
+		int hz = decoder->GetSampleRate();
+		int depth = decoder->GetBitDepth();
+		int channels = decoder->GetChannels();
+
+		m_queue_mixer.Input(buf, buf_sz, hz, depth, channels);
 	}
 
-	int16_t* buf = m_mixer.Output();
-	int buf_sz = m_mixer.GetBufSize();
+	int16_t* buf = m_queue_mixer.Output();
+	int buf_sz = m_queue_mixer.GetBufSize();
 	(*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
 }
 
@@ -322,7 +334,7 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 
 void AudioPool::EnqueueAllBuffers()
 {
-	int buf_sz = m_mixer.GetBufSize();
+	int buf_sz = m_queue_mixer.GetBufSize();
 	void* buf = malloc(buf_sz);
 	memset(buf, 0, buf_sz);
 	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i) {

@@ -2,6 +2,8 @@
 #include "uniaudio/opensl/AudioPool.h"
 #include "uniaudio/opensl/AudioContext.h"
 #include "uniaudio/Decoder.h"
+#include "uniaudio/OutputBuffer.h"
+#include "uniaudio/InputBuffer.h"
 
 #include <assert.h>
 
@@ -16,8 +18,8 @@ Source::Source(AudioPool* pool, const std::string& filepath)
 	, m_active(false)
 	, m_paused(false)
 	, m_stream(false)
-	, m_in_buf(NULL)
-	, m_out_buf(NULL)
+	, m_ibuf(NULL)
+	, m_obuf(NULL)
 	, m_filepath(filepath)
 	, m_player(NULL)
 {
@@ -29,15 +31,17 @@ Source::Source(AudioPool* pool, Decoder* decoder)
 	, m_active(false)
 	, m_paused(false)
 	, m_stream(true)
-	, m_in_buf(decoder)
+	, m_ibuf(NULL)
 	, m_player(NULL)
 {
+	m_ibuf = new InputBuffer(decoder);
+
 	const int HZ = decoder->GetSampleRate();
 	const int depth = decoder->GetBitDepth();
 	const int channels = decoder->GetChannels();
 	const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 	int buf_sz = depth * channels * samples / 8;
-	m_out_buf = new AudioQueue(QUEUE_BUF_COUNT, buf_sz);
+	m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
 }
 
 Source::~Source()
@@ -45,8 +49,11 @@ Source::~Source()
 	if (m_active) {
 		m_pool->Stop(this);
 	}
-	if (m_out_buf) {
-		delete m_out_buf;
+	if (m_ibuf) {
+		delete m_ibuf;
+	}
+	if (m_obuf) {
+		delete m_obuf;
 	}
 }
 
@@ -178,7 +185,8 @@ void Source::RewindImpl()
 		if (m_stream)
 		{
 			bool paused = m_paused;
-			m_in_buf.DecoderRewind();
+			assert(m_ibuf);
+			m_ibuf->DecoderRewind();
 			StopImpl();
 			PlayImpl();
 			if (paused) {
@@ -196,7 +204,8 @@ void Source::RewindImpl()
 	{
 		if (m_stream)
 		{
-			m_in_buf.DecoderRewind();
+			assert(m_ibuf);
+			m_ibuf->DecoderRewind();
 		}
 	}
 }
@@ -214,7 +223,8 @@ bool Source::IsPaused() const
 bool Source::IsFinished() const
 {
 	if (m_stream) {
-		return IsStopped() && !IsLooping() && m_in_buf.IsDecoderFinished();
+		assert(m_ibuf);
+		return IsStopped() && !IsLooping() && m_ibuf->IsDecoderFinished();
 	} else {
 		return IsStopped();
 	}
@@ -222,81 +232,8 @@ bool Source::IsFinished() const
 
 void Source::Stream()
 {
-	m_in_buf.Output(m_out_buf, IsLooping());
-}
-
-/************************************************************************/
-/* class Source::Buffer                                                 */
-/************************************************************************/
-
-Source::Buffer::
-Buffer(Decoder* decoder)
-	: m_decoder(decoder)
-	, m_used(0)
-{
-	if (m_decoder) {
-		m_decoder->AddReference();
-	}
-}
-
-Source::Buffer::
-~Buffer()
-{
-	if (m_decoder) {
-		m_decoder->RemoveReference();
-	}
-}
-
-void Source::Buffer::
-Output(AudioQueue* out, bool looping)
-{
-	if (m_size == 0 || m_used == m_size) {
-		Reload(looping);
-	}
-	if (m_size == 0) {
-		return;
-	}
-
-	while (true)
-	{
-		int left = m_size - m_used;
-		int sz = out->Push(&m_decoder->GetBuffer()[m_used], left);
-		assert(sz <= left);
-		if (sz < left) {
-			m_used += sz;
-			break;
-		} else if (sz == left) {
-			Reload(looping);
-			if (m_size == 0) {
-				break;
-			}
-		}
-	}
-}
-
-bool Source::Buffer::
-IsDecoderFinished() const
-{
-	return m_decoder ? m_decoder->IsFinished() : true;
-}
-
-void Source::Buffer::
-DecoderRewind()
-{
-	if (m_decoder) {
-		m_decoder->Rewind();
-	}
-}
-
-void Source::Buffer::
-Reload(bool looping)
-{
-	m_size = m_decoder->Decode();
-	assert(m_size <= m_decoder->GetBufferSize());	
-	m_used = 0;
-	if (m_decoder->IsFinished() && looping) {
-		m_decoder->Rewind();
-	}
+	assert(m_ibuf && m_obuf);
+	m_ibuf->Output(m_obuf, IsLooping());
 }
 
 }

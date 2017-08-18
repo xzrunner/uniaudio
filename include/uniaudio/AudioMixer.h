@@ -1,5 +1,5 @@
-#ifndef _UNIAUDIO_OPENSL_AUDIO_MIXER_H_
-#define _UNIAUDIO_OPENSL_AUDIO_MIXER_H_
+#ifndef _UNIAUDIO_AUDIO_MIXER_H_
+#define _UNIAUDIO_AUDIO_MIXER_H_
 
 #include <CU_Uncopyable.h>
 
@@ -8,13 +8,11 @@
 
 namespace ua
 {
-namespace opensl
-{
 
 class AudioMixer : private cu::Uncopyable
 {
 public:
-	AudioMixer();
+	AudioMixer(float buf_time_len);
 	~AudioMixer();
 
 	void Input(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel);
@@ -49,6 +47,5 @@ private:
 }; // AudioMixer
 
 }
-}
 
-#endif // _UNIAUDIO_OPENSL_AUDIO_MIXER_H_
+#endif // _UNIAUDIO_AUDIO_MIXER_H_

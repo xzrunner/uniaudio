@@ -1,9 +1,14 @@
 #include "uniaudio/openal/Source.h"
 #include "uniaudio/openal/AudioPool.h"
+#include "uniaudio/openal/AudioContext.h"
 #include "uniaudio/AudioData.h"
 #include "uniaudio/Decoder.h"
+#include "uniaudio/OutputBuffer.h"
+#include "uniaudio/InputBuffer.h"
 
 #include <logger.h>
+
+#include <assert.h>
 
 #define FORCE_REPLAY
 
@@ -14,12 +19,14 @@ namespace openal
 
 Source::Source(AudioPool* pool, const AudioData* data)
 	: m_pool(pool)
-	, m_decoder(NULL)
-	, m_stream(false)
-	, m_source(0)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_stream(false)
+	, m_mix(false)
+	, m_ibuf(NULL)
+	, m_obuf(NULL)
+	, m_player(0)
 {
 	alGetError();
 
@@ -44,22 +51,36 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	}
 }
 
-Source::Source(AudioPool* pool, Decoder* decoder)
+Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 	: m_pool(pool)
-	, m_decoder(decoder)
-	, m_stream(true)
-	, m_source(0)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_stream(true)
+	, m_mix(mix)
+	, m_ibuf(NULL)
+	, m_obuf(NULL)
+	, m_player(0)
 {
-	m_decoder->AddReference();
+	m_ibuf = new InputBuffer(decoder);
 
-	alGetError();
-	alGenBuffers(MAX_BUFFERS, m_buffers);
-	if (alGetError() != AL_NO_ERROR)  {
-		LOGW("alGenBuffers error: %p", decoder);
-		return;
+	if (m_mix)
+	{
+		const int HZ = decoder->GetSampleRate();
+		const int depth = decoder->GetBitDepth();
+		const int channels = decoder->GetChannels();
+		const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
+		int buf_sz = depth * channels * samples / 8;
+		m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
+	}
+	else
+	{
+		alGetError();
+		alGenBuffers(MAX_BUFFERS, m_buffers);
+		if (alGetError() != AL_NO_ERROR)  {
+			LOGW("alGenBuffers error: %p", decoder);
+			return;
+		}
 	}
 }
 
@@ -69,12 +90,18 @@ Source::~Source()
 		m_pool->Stop(this);
 	}
 	if (m_stream) {
-		alDeleteBuffers(MAX_BUFFERS, m_buffers);
+		if (!m_mix) {
+			alDeleteBuffers(MAX_BUFFERS, m_buffers);
+		}
 	} else {
+		assert(!m_mix);
 		alDeleteBuffers(1, m_buffers);
 	}
-	if (m_decoder) {
-		m_decoder->RemoveReference();
+	if (m_ibuf) {
+		delete m_ibuf;
+	}
+	if (m_obuf) {
+		delete m_obuf;
 	}
 }
 
@@ -85,20 +112,29 @@ bool Source::Update()
 	}
 
 	if (!m_stream) {
-		alSourcei(m_source, AL_LOOPING, IsLooping() ? AL_TRUE : AL_FALSE);
+		assert(!m_mix);
+		alSourcei(m_player, AL_LOOPING, IsLooping() ? AL_TRUE : AL_FALSE);
 		return !IsStopped();
 	} else if (!IsLooping() && IsFinished()) {
 		return false;
 	}
 
-	ALint processed = 0;
-	alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &processed);
-	while (processed--)
+	if (m_mix)
 	{
-		ALuint buffer;
-		alSourceUnqueueBuffers(m_source, 1, &buffer);
-		Stream(buffer);
-		alSourceQueueBuffers(m_source, 1, &buffer);
+		assert(m_ibuf && m_obuf);
+		m_ibuf->Output(m_obuf, IsLooping());
+	}
+	else
+	{
+		ALint processed = 0;
+		alGetSourcei(m_player, AL_BUFFERS_PROCESSED, &processed);
+		while (processed--)
+		{
+			ALuint buffer;
+			alSourceUnqueueBuffers(m_player, 1, &buffer);
+			Stream(buffer);
+			alSourceQueueBuffers(m_player, 1, &buffer);
+		}
 	}
 
 	return true;
@@ -119,7 +155,7 @@ void Source::Play()
 		return;
 	}
 
-	m_active = m_pool->Play(this, m_source);
+	m_active = m_pool->Play(this);
 }
 
 void Source::Stop()
@@ -148,66 +184,83 @@ void Source::PlayImpl()
 {
 	if (m_stream)
 	{
-		int used = 0;
-		for (int i = 0; i < MAX_BUFFERS; ++i)
+		if (!m_mix)
 		{
-			Stream(m_buffers[i]);
-			++used;
-			if (m_decoder->IsFinished()) {
-				break;
+			int used = 0;
+			for (int i = 0; i < MAX_BUFFERS; ++i)
+			{
+				Stream(m_buffers[i]);
+				++used;
+				assert(m_ibuf);
+				if (m_ibuf->GetDecoder()->IsFinished()) {
+					break;
+				}
 			}
-		}
-		if (used > 0) {
-			alSourceQueueBuffers(m_source, used, m_buffers);
+			if (used > 0) {
+				alSourceQueueBuffers(m_player, used, m_buffers);
+			}
 		}
 	}
 	else
 	{
-		alSourcei(m_source, AL_BUFFER, m_buffers[0]);
+		assert(!m_mix);
+		alSourcei(m_player, AL_BUFFER, m_buffers[0]);
 		if (alGetError() != AL_NO_ERROR)  {
 			LOGW("%s", "Source::PlayImpl bind buffer error");
 			return;
 		}
 	}
 
-	alSourcePlay(m_source);
-	if (alGetError() != AL_NO_ERROR)  {
-		LOGW("%s", "Source::PlayImpl alSourcePlay error");
-		return;
+	if (!m_mix)
+	{
+		alSourcePlay(m_player);
+		if (alGetError() != AL_NO_ERROR)  {
+			LOGW("%s", "Source::PlayImpl alSourcePlay error");
+			return;
+		}
 	}
 
 	m_active = true;
-
 }
 
 void Source::StopImpl()
 {
-	if (m_active)
+	if (!m_active) {
+		return;
+	}
+
+	if (m_stream)
 	{
-		if (m_stream)
+		if (!m_mix)
 		{
-			alSourceStop(m_source);
+			alSourceStop(m_player);
 			int queued = 0;
-			alGetSourcei(m_source, AL_BUFFERS_QUEUED, &queued);
+			alGetSourcei(m_player, AL_BUFFERS_QUEUED, &queued);
 			while (queued--)
 			{
 				ALuint buffer;
-				alSourceUnqueueBuffers(m_source, 1, &buffer);
+				alSourceUnqueueBuffers(m_player, 1, &buffer);
 			}
 		}
-		else
-		{
-			alSourceStop(m_source);
-		}
-		alSourcei(m_source, AL_BUFFER, AL_NONE);
 	}
+	else
+	{
+		assert(!m_mix);
+		alSourceStop(m_player);
+	}
+	if (!m_mix) {
+		alSourcei(m_player, AL_BUFFER, AL_NONE);
+	}
+
 	m_active = false;
 }
 
 void Source::PauseImpl()
 {
  	if (m_active) {
- 		alSourcePause(m_source);
+		if (!m_mix) {
+			alSourcePause(m_player);
+		}
  		m_paused = true;
  	}
 }
@@ -215,7 +268,9 @@ void Source::PauseImpl()
 void Source::ResumeImpl()
 {
  	if (m_active && m_paused) {
- 		alSourcePlay(m_source);
+		if (!m_mix) {
+ 			alSourcePlay(m_player);
+		}
  		m_paused = false;
  	}
 }
@@ -227,7 +282,8 @@ void Source::RewindImpl()
 		if (m_stream)
 		{
 			bool paused = m_paused;
-			m_decoder->Rewind();
+			assert(m_ibuf);
+			m_ibuf->GetDecoder()->Rewind();
 			StopImpl();
 			PlayImpl();
 			if (paused) {
@@ -236,9 +292,10 @@ void Source::RewindImpl()
 		}
 		else
 		{
-		 	alSourceRewind(m_source);
+			assert(!m_mix);
+		 	alSourceRewind(m_player);
 		 	if (!m_paused) {
-		 		alSourcePlay(m_source);
+		 		alSourcePlay(m_player);
 		 	}
 		}
 	}
@@ -246,7 +303,8 @@ void Source::RewindImpl()
 	{
 		if (m_stream)
 		{
-			m_decoder->Rewind();
+			assert(m_ibuf);
+			m_ibuf->GetDecoder()->Rewind();
 		}
 	}
 }
@@ -254,9 +312,58 @@ void Source::RewindImpl()
 void Source::SetLooping(bool looping)
 {
 	if (m_active && !m_stream) {
-		alSourcei(m_source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+		assert(!m_mix);
+		alSourcei(m_player, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
 	}
 	m_looping = looping;
+}
+
+void Source::SetPlayer(ALuint player) 
+{ 
+	assert(!m_mix); 
+	m_player = player; 
+}
+
+bool Source::IsStopped() const
+{
+	// todo
+	if (m_mix) {
+		return false;
+	}
+
+	if (m_active) {
+		ALenum state;
+		alGetSourcei(m_player, AL_SOURCE_STATE, &state);
+		return (state == AL_STOPPED);
+	} else {
+		return true;
+	}
+}
+
+bool Source::IsPaused() const
+{
+	// todo
+	if (m_mix) {
+		return false;
+	}
+
+	if (m_active) {
+		ALenum state;
+		alGetSourcei(m_player, AL_SOURCE_STATE, &state);
+		return (state == AL_PAUSED);
+	} else {
+		return false;
+	}
+}
+
+bool Source::IsFinished() const
+{
+	if (m_stream) {
+		assert(m_ibuf);
+		return IsStopped() && !IsLooping() && m_ibuf->GetDecoder()->IsFinished();
+	} else {
+		return IsStopped();
+	}
 }
 
 ALenum Source::GetFormat(int channels, int bit_depth)
@@ -273,49 +380,21 @@ ALenum Source::GetFormat(int channels, int bit_depth)
 	return 0;
 }
 
-bool Source::IsStopped() const
-{
-	if (m_active) {
-		ALenum state;
-		alGetSourcei(m_source, AL_SOURCE_STATE, &state);
-		return (state == AL_STOPPED);
-	} else {
-		return true;
-	}
-}
-
-bool Source::IsPaused() const
-{
-	if (m_active) {
-		ALenum state;
-		alGetSourcei(m_source, AL_SOURCE_STATE, &state);
-		return (state == AL_PAUSED);
-	} else {
-		return false;
-	}
-}
-
-bool Source::IsFinished() const
-{
-	if (m_stream) {
-		return IsStopped() && !IsLooping() && m_decoder->IsFinished();
-	} else {
-		return IsStopped();
-	}
-}
-
 int Source::Stream(ALuint buffer)
 {
-	int decoded = m_decoder->Decode();
+	assert(m_ibuf && !m_mix);
+	Decoder* d = m_ibuf->GetDecoder();
 
-	int fmt = GetFormat(m_decoder->GetChannels(), m_decoder->GetBitDepth());
+	int decoded = d->Decode();
+
+	int fmt = GetFormat(d->GetChannels(), d->GetBitDepth());
 	if (fmt != 0) {
-		alBufferData(buffer, fmt, m_decoder->GetBuffer(), decoded, m_decoder->GetSampleRate());
+		alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
 	}
 
-	if (m_decoder->IsFinished() && IsLooping())
+	if (d->IsFinished() && IsLooping())
 	{
-		m_decoder->Rewind();
+		d->Rewind();
 	}
 
 	return decoded;

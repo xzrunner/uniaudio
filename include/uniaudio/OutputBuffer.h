@@ -1,5 +1,5 @@
-#ifndef _UNIAUDIO_OPENSL_AUDIO_QUEUE_H_
-#define _UNIAUDIO_OPENSL_AUDIO_QUEUE_H_
+#ifndef _UNIAUDIO_OUTPUT_BUFFER_H_
+#define _UNIAUDIO_OUTPUT_BUFFER_H_
 
 #include <CU_Uncopyable.h>
 
@@ -10,18 +10,14 @@
 namespace ua
 {
 namespace thread { class Mutex; }
-namespace opensl
-{
-
-class AudioQueue
+class OutputBuffer
 {
 public:
-	AudioQueue(int count, int size);
-	~AudioQueue();
+	OutputBuffer(int count, int size);
+	~OutputBuffer();
 
-	int Push(const unsigned char* buf, int buf_sz);
-
-	const unsigned char* Pop(int& sz); 
+	int Input(const unsigned char* buf, int buf_sz);
+	const unsigned char* Output(int& sz);
 
 private:
 	void Init(int count, int size);
@@ -41,9 +37,8 @@ private:
 
 	bool m_full;
 
-}; // AudioQueue
+}; // OutputBuffer
 
 }
-}
 
-#endif // _UNIAUDIO_OPENSL_AUDIO_QUEUE_H_
+#endif // _UNIAUDIO_OUTPUT_BUFFER_H_

@@ -10,6 +10,8 @@ namespace ua
 
 class AudioData;
 class Decoder;
+class InputBuffer;
+class OutputBuffer;
 
 namespace openal
 {
@@ -19,7 +21,7 @@ class Source : public ua::Source
 {
 public:
 	Source(AudioPool* pool, const AudioData* data);
-	Source(AudioPool* pool, Decoder* decoder);
+	Source(AudioPool* pool, Decoder* decoder, bool mix = false);
 	virtual ~Source();
 
 	virtual bool Update();
@@ -39,30 +41,45 @@ public:
 	void SetLooping(bool looping);
 	bool IsLooping() const { return m_looping; }
 
-private:
-	static ALenum GetFormat(int channels, int bit_depth);
+	const InputBuffer* GetInputBuffer() const { return m_ibuf; }
+	OutputBuffer* GetOutputBuffer() { return m_obuf; }
+
+	void SetPlayer(ALuint player);
+	ALuint GetPlayer() { return m_player; }
 
 	bool IsStopped() const;
 	bool IsPaused() const;
 	bool IsFinished() const;
 
+	bool IsStream() const { return m_stream; }
+	bool IsMix() const { return m_mix; }
+
+private:
+	static ALenum GetFormat(int channels, int bit_depth);
+
 	int Stream(ALuint buffer);
+
+private:
+	static const int OUTPUT_BUF_COUNT = 16;
 
 private:
 	AudioPool* m_pool;
 
-	Decoder* m_decoder;
-
-	const bool m_stream;
-
-	static const unsigned int MAX_BUFFERS = 32;
-	ALuint m_buffers[MAX_BUFFERS];
-
-	ALuint m_source;
-
 	bool m_looping;
 	bool m_active;
 	bool m_paused;
+
+	const bool m_stream;
+	const bool m_mix;
+
+	// queue
+	InputBuffer*  m_ibuf;
+	OutputBuffer* m_obuf;
+
+	// no mix
+	ALuint m_player;
+	static const unsigned int MAX_BUFFERS = 32;
+	ALuint m_buffers[MAX_BUFFERS];
 
 }; // Source
 

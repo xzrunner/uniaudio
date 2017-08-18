@@ -1,5 +1,4 @@
-#include "uniaudio/opensl/AudioMixer.h"
-#include "uniaudio/opensl/AudioContext.h"
+#include "uniaudio/AudioMixer.h"
 
 #include <algorithm>
 
@@ -7,13 +6,11 @@
 
 namespace ua
 {
-namespace opensl
-{
 
-AudioMixer::AudioMixer()
+AudioMixer::AudioMixer(float buf_time_len)
 	: m_dirty(false)
 {
-	m_samples = static_cast<int>(DEFAULT_SAMPLE_RATE * AudioContext::BUFFER_TIME_LEN);
+	m_samples = static_cast<int>(DEFAULT_SAMPLE_RATE * buf_time_len);
 	m_mix_buffer = new int32_t[m_samples * DEFAULT_CHANNELS];
 	if (m_mix_buffer) {
 		memset(m_mix_buffer, 0, sizeof(int32_t) * m_samples * DEFAULT_CHANNELS);
@@ -150,5 +147,4 @@ void AudioMixer::Reset()
 	memset(m_out_buffer, 0, sizeof(int16_t) * m_samples * DEFAULT_CHANNELS);
 }
 
-}
 }

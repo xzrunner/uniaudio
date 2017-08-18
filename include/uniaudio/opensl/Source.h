@@ -2,7 +2,6 @@
 #define _UNIAUDIO_OPENSL_SOURCE_H_
 
 #include "uniaudio/Source.h"
-#include "uniaudio/opensl/AudioQueue.h"
 #include "uniaudio/opensl/AudioPlayer.h"
 
 #include <string>
@@ -12,6 +11,8 @@ namespace ua
 
 class AudioData;
 class Decoder;
+class InputBuffer;
+class OutputBuffer;
 
 namespace opensl
 {
@@ -41,8 +42,8 @@ public:
 	void SetLooping(bool looping);
 	bool IsLooping() const { return m_looping; }
 
-	const Decoder* GetDecoder() const { return m_in_buf.GetDecoder(); }
-	AudioQueue* GetBuffers() { return m_out_buf; }
+	const InputBuffer* GetInputBuffer() const { return m_ibuf; }
+	OutputBuffer* GetOutputBuffer() { return m_obuf; }
 
 	const std::string& GetFilepath() const { return m_filepath; }
 
@@ -61,30 +62,7 @@ private:
 	void Stream();
 
 private:
-	static const int QUEUE_BUF_COUNT = 16;
-
-private:
-	class Buffer
-	{
-	public:
-		Buffer(Decoder* decoder);
-		~Buffer();
-
-		void Output(AudioQueue* out, bool looping);
-
-		bool IsDecoderFinished() const;
-		void DecoderRewind();
-
-		const Decoder* GetDecoder() const { return m_decoder; }
-
-	private:
-		void Reload(bool looping);
-
-	private:
-		Decoder* m_decoder;
-		int m_size, m_used;
-
-	}; // Buffer
+	static const int OUTPUT_BUF_COUNT = 16;
 
 private:
 	AudioPool* m_pool;
@@ -95,9 +73,9 @@ private:
 
 	const bool m_stream;
 
-	// stream
-	Buffer      m_in_buf;
-	AudioQueue* m_out_buf;
+	// queue
+	InputBuffer*  m_ibuf;
+	OutputBuffer* m_obuf;
 
 	// asset
 	std::string  m_filepath;

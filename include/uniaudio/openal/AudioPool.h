@@ -1,11 +1,14 @@
 #ifndef _UNIAUDIO_OPENAL_AUDIO_POOL_H_
 #define _UNIAUDIO_OPENAL_AUDIO_POOL_H_
 
+#include <uniaudio/AudioMixer.h>
+
 #include <CU_Uncopyable.h>
+
 #include <OpenAL/al.h>
 
 #include <queue>
-#include <map>
+#include <set>
 
 namespace ua
 {
@@ -22,7 +25,7 @@ public:
 
 	void Update();
 
-	bool Play(Source* source, ALuint& out);
+	bool Play(Source* source);
 	void Stop();
 	void Stop(Source* source);
 	void Pause();
@@ -33,14 +36,37 @@ public:
 	void Rewind(Source* source);
 
 private:
+	class QueuePlayer
+	{
+	public:
+		QueuePlayer();
+		~QueuePlayer();
+
+		void Update(const std::set<Source*>& playing);
+
+	private:
+		void Stream(ALuint buffer, const std::set<Source*>& playing);
+
+	private:
+		ALuint     m_source;
+		AudioMixer m_mixer;
+
+		static const unsigned int MAX_BUFFERS = 16;
+		ALuint m_buffers[MAX_BUFFERS];
+
+	}; // QueuePlayer
+
+private:
 	thread::Mutex* m_mutex;
 
-	static const int NUM_SOURCES = 64;
-	ALuint m_sources[NUM_SOURCES];
+	std::set<Source*> m_playing;
 
-	std::queue<ALuint> m_available;
+	// asset
+	static const int NUM_ASSET_PLAYERS = 64;
+	std::queue<ALuint> m_asset_player_freelist;
 
-	std::map<Source*, ALuint> m_playing;
+	// queue
+	QueuePlayer m_queue_player;
 
 }; // AudioPool
 

@@ -1,4 +1,4 @@
-#include "uniaudio/opensl/AudioQueue.h"
+#include "uniaudio/OutputBuffer.h"
 #include "uniaudio/Thread.h"
 
 #include <string.h>
@@ -7,10 +7,8 @@
 
 namespace ua
 {
-namespace opensl
-{
 
-AudioQueue::AudioQueue(int count, int size)
+OutputBuffer::OutputBuffer(int count, int size)
 	: m_full(false)
 {
 	m_mutex = new thread::Mutex();
@@ -18,7 +16,7 @@ AudioQueue::AudioQueue(int count, int size)
 	Init(count, size);
 }
 
-AudioQueue::~AudioQueue()
+OutputBuffer::~OutputBuffer()
 {
 	std::list<Buffer*>::iterator itr = m_bufs.begin();
 	for ( ; itr != m_bufs.end(); ++itr) {
@@ -28,7 +26,7 @@ AudioQueue::~AudioQueue()
 	delete m_mutex;
 }
 
-int AudioQueue::Push(const unsigned char* buf, int buf_sz)
+int OutputBuffer::Input(const unsigned char* buf, int buf_sz)
 {
 	thread::Lock lock(m_mutex);
 
@@ -63,7 +61,7 @@ int AudioQueue::Push(const unsigned char* buf, int buf_sz)
 	return fill_sz;
 }
 
-const unsigned char* AudioQueue::Pop(int& sz)
+const unsigned char* OutputBuffer::Output(int& sz)
 {
 	thread::Lock lock(m_mutex);
 
@@ -81,7 +79,7 @@ const unsigned char* AudioQueue::Pop(int& sz)
 	return ret;
 }
 
-void AudioQueue::Init(int count, int size)
+void OutputBuffer::Init(int count, int size)
 {
 	size_t sz = sizeof(Buffer) - sizeof(uint8_t) + size;
 	sz = (sz + 3) & ~3;   // padding to 4 bytes aligned
@@ -99,5 +97,4 @@ void AudioQueue::Init(int count, int size)
 	}
 }
 
-}
 }

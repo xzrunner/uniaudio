@@ -1,7 +1,7 @@
 #ifndef _UNIAUDIO_OPENSL_AUDIO_POOL_H_
 #define _UNIAUDIO_OPENSL_AUDIO_POOL_H_
 
-#include <uniaudio/opensl/AudioMixer.h>
+#include <uniaudio/AudioMixer.h>
 #include <uniaudio/opensl/AudioPlayer.h>
 
 #include <CU_Uncopyable.h>
@@ -64,8 +64,7 @@ private:
 
 	// queue
 	QueuePlayer m_queue_player;
-	
-	AudioMixer m_mixer;
+	AudioMixer  m_queue_mixer;
 
 }; // AudioPool
 

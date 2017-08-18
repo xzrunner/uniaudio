@@ -148,6 +148,30 @@
 		<Filter
 			Name="external"
 			>
+			<Filter
+				Name="sles"
+				>
+				<File
+					RelativePath="..\..\..\external\SLES\OpenSLES.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\external\SLES\OpenSLES_Android.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\external\SLES\OpenSLES_AndroidConfiguration.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\external\SLES\OpenSLES_AndroidMetadata.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\external\SLES\OpenSLES_Platform.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="context"
@@ -260,30 +284,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\source\opensl\AudioMixer.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\opensl\"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\opensl\"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\include\uniaudio\opensl\AudioMixer.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\source\opensl\AudioPlayer.cpp"
 					>
 					<FileConfiguration
@@ -329,30 +329,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\include\uniaudio\opensl\AudioPool.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\source\opensl\AudioQueue.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\opensl\"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\opensl\"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\include\uniaudio\opensl\AudioQueue.h"
 					>
 				</File>
 				<File
@@ -422,6 +398,30 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\uniaudio\AudioData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\AudioMixer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\AudioMixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\InputBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\InputBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\OutputBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\OutputBuffer.h"
 				>
 			</File>
 			<File

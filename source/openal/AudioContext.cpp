@@ -11,6 +11,8 @@ namespace ua
 namespace openal
 {
 
+const float AudioContext::BUFFER_TIME_LEN = 0.01f;
+
 AudioContext::AudioContext()
 	: m_device(NULL)
 	, m_context(NULL)
@@ -35,7 +37,7 @@ ua::Source* AudioContext::CreateSource(const AudioData* data)
 
 ua::Source* AudioContext::CreateSource(Decoder* decoder)
 {
-	return new Source(m_pool, decoder);
+	return new Source(m_pool, decoder, true);
 }
 
 ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
