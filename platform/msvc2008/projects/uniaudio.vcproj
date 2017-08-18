@@ -162,6 +162,22 @@
 				<File
 					RelativePath="..\..\..\source\openal\AudioContext.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\include\uniaudio\openal\AudioContext.h"
@@ -170,6 +186,22 @@
 				<File
 					RelativePath="..\..\..\source\openal\AudioPool.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\include\uniaudio\openal\AudioPool.h"
@@ -178,9 +210,173 @@
 				<File
 					RelativePath="..\..\..\source\openal\Source.cpp"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\openal\"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\..\include\uniaudio\openal\Source.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="opensl"
+				>
+				<File
+					RelativePath="..\..\..\source\opensl\AudioContext.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\AudioContext.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\opensl\AudioMixer.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\AudioMixer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\opensl\AudioPlayer.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\AudioPlayer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\opensl\AudioPool.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\AudioPool.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\opensl\AudioQueue.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\AudioQueue.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\source\opensl\Source.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\opensl\"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\include\uniaudio\opensl\Source.h"
 					>
 				</File>
 			</Filter>
