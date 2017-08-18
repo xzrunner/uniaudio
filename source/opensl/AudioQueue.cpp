@@ -2,6 +2,7 @@
 #include "uniaudio/Thread.h"
 
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 
 namespace ua
