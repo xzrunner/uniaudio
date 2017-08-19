@@ -265,6 +265,8 @@ Update(const std::set<Source*>& playing)
 void AudioPool::QueuePlayer::
 Stream(ALuint buffer, const std::set<Source*>& playing)
 {
+	m_mixer.Reset();
+
 	ALenum fmt = AL_FORMAT_STEREO16;
 	std::set<Source*>::const_iterator itr = playing.begin();
 	for ( ; itr != playing.end(); ++itr)
