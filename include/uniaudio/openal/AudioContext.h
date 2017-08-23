@@ -2,9 +2,10 @@
 #define _UNIAUDIO_OPENAL_AUDIO_CONTEXT_H_
 
 #include "uniaudio/AudioContext.h"
-#include "uniaudio/Thread.h"
 
 #include <OpenAL/alc.h>
+
+namespace mt { class Thread; }
 
 namespace ua
 {
@@ -35,7 +36,7 @@ private:
 	ALCcontext* m_context;
 
 	AudioPool* m_pool;
-	thread::Thread* m_pool_thread;
+	mt::Thread* m_pool_thread;
 
 }; // AudioContext
 

@@ -1,12 +1,11 @@
 #include "uniaudio/openal/AudioPool.h"
 #include "uniaudio/openal/Source.h"
 #include "uniaudio/openal/AudioContext.h"
-#include "uniaudio/Thread.h"
 #include "uniaudio/Decoder.h"
 #include "uniaudio/InputBuffer.h"
 #include "uniaudio/OutputBuffer.h"
 
-#include <OpenAL/al.h>
+#include <multitask/Thread.h>
 
 #include <fault.h>
 #include <logger.h>
@@ -20,7 +19,7 @@ namespace openal
 
 AudioPool::AudioPool()
 {
-	m_mutex = new thread::Mutex();
+	m_mutex = new mt::Mutex();
 
 	ALuint sources[NUM_ASSET_PLAYERS];
 	alGenSources(NUM_ASSET_PLAYERS, sources);
@@ -53,7 +52,7 @@ AudioPool::~AudioPool()
 
 void AudioPool::Update()
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); )
@@ -81,7 +80,7 @@ void AudioPool::Update()
 
 bool AudioPool::Play(Source* source)
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
@@ -108,7 +107,7 @@ bool AudioPool::Play(Source* source)
 
 void AudioPool::Stop()
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
@@ -126,7 +125,7 @@ void AudioPool::Stop()
 
 void AudioPool::Stop(Source* source)
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end())
@@ -144,7 +143,7 @@ void AudioPool::Stop(Source* source)
 
 void AudioPool::Pause()
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
 		(*itr)->PauseImpl();
@@ -153,7 +152,7 @@ void AudioPool::Pause()
 
 void AudioPool::Pause(Source* source)
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->PauseImpl();
@@ -162,7 +161,7 @@ void AudioPool::Pause(Source* source)
 
 void AudioPool::Resume()
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
 		(*itr)->ResumeImpl();
@@ -171,7 +170,7 @@ void AudioPool::Resume()
 
 void AudioPool::Resume(Source* source)
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->ResumeImpl();
@@ -180,7 +179,7 @@ void AudioPool::Resume(Source* source)
 
 void AudioPool::Rewind()
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
 		(*itr)->RewindImpl();
@@ -189,7 +188,7 @@ void AudioPool::Rewind()
 
 void AudioPool::Rewind(Source* source)
 {
-	thread::Lock lock(m_mutex);
+	mt::Lock lock(m_mutex);
 	source->RewindImpl();
 }
 

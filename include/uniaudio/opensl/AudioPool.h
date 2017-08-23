@@ -12,9 +12,10 @@
 #include <set>
 #include <queue>
 
+namespace mt { class Mutex; }
+
 namespace ua
 {
-namespace thread { class Mutex; }
 namespace opensl
 {
 class Source;
@@ -52,7 +53,7 @@ private:
 	bool InitAssetsAudioPlayer(AssetPlayer* player, const Source* source);
 
 private:
-	thread::Mutex* m_mutex;
+	mt::Mutex* m_mutex;
 
 	AudioContext* m_ctx;
 

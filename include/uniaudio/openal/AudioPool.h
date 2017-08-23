@@ -10,9 +10,10 @@
 #include <queue>
 #include <set>
 
+namespace mt { class Mutex; }
+
 namespace ua
 {
-namespace thread { class Mutex; }
 namespace openal
 {
 
@@ -57,7 +58,7 @@ private:
 	}; // QueuePlayer
 
 private:
-	thread::Mutex* m_mutex;
+	mt::Mutex* m_mutex;
 
 	std::set<Source*> m_playing;
 

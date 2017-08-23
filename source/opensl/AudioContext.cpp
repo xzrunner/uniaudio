@@ -3,6 +3,8 @@
 #include "uniaudio/opensl/Source.h"
 #include "uniaudio/DecoderFactory.h"
 
+#include <multitask/Thread.h>
+
 #include <assert.h>
 #include <stddef.h>
 
@@ -22,7 +24,7 @@ pool_thread_main(void* arg)
 	{
 		AudioPool* pool = static_cast<AudioPool*>(arg);
 		pool->Update();
-		thread::Thread::Delay(5);
+		mt::Thread::Delay(5);
 	}
 }
 
@@ -37,7 +39,7 @@ AudioContext::AudioContext()
 
 	m_pool = new AudioPool(this);
 
-	m_pool_thread = new thread::Thread(pool_thread_main, m_pool);
+	m_pool_thread = new mt::Thread(pool_thread_main, m_pool);
 }
 
 AudioContext::~AudioContext()

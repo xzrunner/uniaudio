@@ -7,9 +7,11 @@
 
 #include <stdint.h>
 
+namespace mt { class Mutex; }
+
 namespace ua
 {
-namespace thread { class Mutex; }
+
 class OutputBuffer
 {
 public:
@@ -31,7 +33,7 @@ private:
 	};
 
 private:
-	thread::Mutex* m_mutex;
+	mt::Mutex* m_mutex;
 
  	std::list<Buffer*> m_bufs;
 

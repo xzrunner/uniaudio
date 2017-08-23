@@ -4,6 +4,8 @@
 #include "uniaudio/AudioData.h"
 #include "uniaudio/DecoderFactory.h"
 
+#include <multitask/Thread.h>
+
 #include <stddef.h>
 
 namespace ua
@@ -56,7 +58,7 @@ pool_thread_main(void* arg)
 	{
 		AudioPool* pool = static_cast<AudioPool*>(arg);
 		pool->Update();
-		thread::Thread::Delay(5);
+		mt::Thread::Delay(5);
 	}
 }
 
@@ -77,7 +79,7 @@ bool AudioContext::Init()
 	}
 
 	m_pool = new AudioPool();
-	m_pool_thread = new thread::Thread(pool_thread_main, m_pool);
+	m_pool_thread = new mt::Thread(pool_thread_main, m_pool);
 
 	return true;
 }
