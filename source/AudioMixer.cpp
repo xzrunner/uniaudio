@@ -53,23 +53,25 @@ void AudioMixer::MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 	if (bit_depth == 8)
 	{
 		const int8_t* src_ptr = reinterpret_cast<const int8_t*>(buf);
-		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i) {
-			for (int j = 0; j < up_sample_rate; ++j) {
-				*dst_ptr += *src_ptr;
-				++dst_ptr;
+		int count = 0;
+		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i, ++dst_ptr) {
+			*dst_ptr += *src_ptr;
+			if (++count == up_sample_rate) {
+				count = 0;
+				++src_ptr;
 			}
-			++src_ptr;
 		}
 	}
 	else if (bit_depth == 16)
 	{
 		const int16_t* src_ptr = reinterpret_cast<const int16_t*>(buf);
-		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i) {
-			for (int j = 0; j < up_sample_rate; ++j) {
-				*dst_ptr += *src_ptr;
-				++dst_ptr;
+		int count = 0;
+		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i, ++dst_ptr) {
+			*dst_ptr += *src_ptr;
+			if (++count == up_sample_rate) {
+				count = 0;
+				++src_ptr;
 			}
-			++src_ptr;
 		}
 	}
 }
