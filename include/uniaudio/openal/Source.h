@@ -21,7 +21,7 @@ class Source : public ua::Source
 {
 public:
 	Source(AudioPool* pool, const AudioData* data);
-	Source(AudioPool* pool, Decoder* decoder, bool mix = false);
+	Source(AudioPool* pool, Decoder* decoder, bool mix = true);
 	virtual ~Source();
 
 	virtual bool Update();
