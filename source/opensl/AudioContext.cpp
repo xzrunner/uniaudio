@@ -4,6 +4,9 @@
 #include "uniaudio/DecoderFactory.h"
 
 #include <multitask/Thread.h>
+#include <multitask/Task.h>
+#include <multitask/ThreadPool.h>
+#include <multitask/TaskPool.h>
 
 #include <assert.h>
 #include <stddef.h>
@@ -17,15 +20,20 @@ const float AudioContext::BUFFER_TIME_LEN = 0.01f;
 
 const SLEnvironmentalReverbSettings AudioContext::m_reverb_settings = SL_I3DL2_ENVIRONMENT_PRESET_STONECORRIDOR;
 
-static void* 
-pool_thread_main(void* arg)
+static void
+thread_update_cb(void* arg)
 {
-	while (true)
-	{
-		AudioPool* pool = static_cast<AudioPool*>(arg);
-		pool->Update();
-		mt::Thread::Delay(5);
-	}
+	AudioPool* pool = static_cast<AudioPool*>(arg);
+	pool->Update();	
+}
+
+static void
+task_update_cb(void* arg)
+{
+	mt::Task* t = mt::TaskPool::Instance()->Fetch();
+	assert(t);
+	static_cast<mt::CommonTask*>(t)->SetUpdateCB(thread_update_cb, arg);
+	mt::ThreadPool::Instance()->AddTask(t);
 }
 
 AudioContext::AudioContext()
@@ -33,13 +41,12 @@ AudioContext::AudioContext()
 	, m_engine_engine(NULL)
 	, m_output_mix_obj(NULL)
 	, m_output_mix_env_reverb(NULL)
-	, m_pool_thread(NULL)
 {
 	CreateEngine();
 
 	m_pool = new AudioPool(this);
 
-	m_pool_thread = new mt::Thread(pool_thread_main, m_pool);
+	mt::ThreadPool::Instance()->RegisterUpdateCB(task_update_cb, m_pool);
 }
 
 AudioContext::~AudioContext()
@@ -50,8 +57,10 @@ AudioContext::~AudioContext()
 	if (m_output_mix_obj) {
 		(*m_output_mix_obj)->Destroy(m_output_mix_obj);
 	}
+
+	mt::ThreadPool::Instance()->UnregisterUpdateCB(task_update_cb);
+
 	delete m_pool;
-	delete m_pool_thread;
 }
 
 ua::Source* AudioContext::CreateSource(const AudioData* data)

@@ -14,8 +14,6 @@
 #include <string>
 #endif // __ANDROID__
 
-namespace mt { class Thread; }
-
 namespace ua
 {
 
@@ -68,8 +66,6 @@ private:
 #ifdef __ANDROID__
  	AAssetManager* m_aasset_mgr;
 #endif // __ANDROID__
-
-	mt::Thread* m_pool_thread;
 
 }; // AudioContext
 

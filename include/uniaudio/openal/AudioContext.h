@@ -5,8 +5,6 @@
 
 #include <OpenAL/alc.h>
 
-namespace mt { class Thread; }
-
 namespace ua
 {
 namespace openal
@@ -36,7 +34,6 @@ private:
 	ALCcontext* m_context;
 
 	AudioPool* m_pool;
-	mt::Thread* m_pool_thread;
 
 }; // AudioContext
 

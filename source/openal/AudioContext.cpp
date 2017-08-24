@@ -5,8 +5,12 @@
 #include "uniaudio/DecoderFactory.h"
 
 #include <multitask/Thread.h>
+#include <multitask/Task.h>
+#include <multitask/TaskPool.h>
+#include <multitask/ThreadPool.h>
 
 #include <stddef.h>
+#include <assert.h>
 
 namespace ua
 {
@@ -14,6 +18,22 @@ namespace openal
 {
 
 const float AudioContext::BUFFER_TIME_LEN = 0.01f;
+
+static void
+thread_update_cb(void* arg)
+{
+	AudioPool* pool = static_cast<AudioPool*>(arg);
+	pool->Update();	
+}
+
+static void
+task_update_cb(void* arg)
+{
+	mt::Task* t = mt::TaskPool::Instance()->Fetch();
+	assert(t);
+	static_cast<mt::CommonTask*>(t)->SetUpdateCB(thread_update_cb, arg);
+	mt::ThreadPool::Instance()->AddTask(t);
+}
 
 AudioContext::AudioContext()
 	: m_device(NULL)
@@ -24,8 +44,9 @@ AudioContext::AudioContext()
 
 AudioContext::~AudioContext()
 {
+	mt::ThreadPool::Instance()->UnregisterUpdateCB(task_update_cb);
+
 	delete m_pool;
-	delete m_pool_thread;
 
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(m_context);
@@ -51,17 +72,6 @@ ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
 	}
 }
 
-static void* 
-pool_thread_main(void* arg)
-{
-	while (true)
-	{
-		AudioPool* pool = static_cast<AudioPool*>(arg);
-		pool->Update();
-		mt::Thread::Delay(5);
-	}
-}
-
 bool AudioContext::Init()
 {
 	m_device = alcOpenDevice(NULL);
@@ -79,7 +89,8 @@ bool AudioContext::Init()
 	}
 
 	m_pool = new AudioPool();
-	m_pool_thread = new mt::Thread(pool_thread_main, m_pool);
+
+	mt::ThreadPool::Instance()->RegisterUpdateCB(task_update_cb, m_pool);
 
 	return true;
 }
