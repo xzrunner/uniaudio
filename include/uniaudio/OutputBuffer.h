@@ -2,12 +2,11 @@
 #define _UNIAUDIO_OUTPUT_BUFFER_H_
 
 #include <CU_Uncopyable.h>
+#include <multitask/Thread.h>
 
 #include <list>
 
 #include <stdint.h>
-
-namespace mt { class Mutex; }
 
 namespace ua
 {
@@ -33,7 +32,7 @@ private:
 	};
 
 private:
-	mt::Mutex* m_mutex;
+	mt::Mutex m_mutex;
 
  	std::list<Buffer*> m_bufs;
 

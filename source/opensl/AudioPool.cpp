@@ -5,8 +5,6 @@
 #include "uniaudio/InputBuffer.h"
 #include "uniaudio/OutputBuffer.h"
 
-#include <multitask/Thread.h>
-
 #include <assert.h>
 #include <stddef.h>
 
@@ -19,8 +17,6 @@ AudioPool::AudioPool(AudioContext* ctx)
 	: m_ctx(ctx)
 	, m_queue_mixer(AudioContext::BUFFER_TIME_LEN)
 {
-	m_mutex = new mt::Mutex();
-
 	CreateAssetsAudioPlayer();
 
 	CreateBufferQueueAudioPlayer();
@@ -37,8 +33,6 @@ AudioPool::~AudioPool()
 		delete player;
 		m_asset_player_freelist.pop();
 	}
-
-	delete m_mutex;
 }
 
 void AudioPool::Update()

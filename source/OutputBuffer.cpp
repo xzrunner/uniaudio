@@ -1,7 +1,5 @@
 #include "uniaudio/OutputBuffer.h"
 
-#include <multitask/Thread.h>
-
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -12,8 +10,6 @@ namespace ua
 OutputBuffer::OutputBuffer(int count, int size)
 	: m_full(false)
 {
-	m_mutex = new mt::Mutex();
-
 	Init(count, size);
 }
 
@@ -23,8 +19,6 @@ OutputBuffer::~OutputBuffer()
 	for ( ; itr != m_bufs.end(); ++itr) {
 		delete *itr;
 	}
-
-	delete m_mutex;
 }
 
 int OutputBuffer::Input(const unsigned char* buf, int buf_sz)

@@ -5,8 +5,6 @@
 #include "uniaudio/InputBuffer.h"
 #include "uniaudio/OutputBuffer.h"
 
-#include <multitask/Thread.h>
-
 #include <fault.h>
 #include <logger.h>
 
@@ -19,8 +17,6 @@ namespace openal
 
 AudioPool::AudioPool()
 {
-	m_mutex = new mt::Mutex();
-
 	ALuint sources[NUM_ASSET_PLAYERS];
 	alGenSources(NUM_ASSET_PLAYERS, sources);
 	if (alGetError() != AL_NO_ERROR) {
@@ -46,8 +42,6 @@ AudioPool::~AudioPool()
 		m_asset_player_freelist.pop();
 	}
 	alDeleteSources(NUM_ASSET_PLAYERS, sources);
-
-	delete m_mutex;
 }
 
 void AudioPool::Update()
