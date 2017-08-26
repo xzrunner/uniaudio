@@ -13,6 +13,7 @@ LOCAL_C_INCLUDES  := \
 	${CU_SRC_PATH} \
 	${MPG123_SRC_PATH} \
 	${OPENAL_SRC_PATH} \
+	${MULTITASK_SRC_PATH}/include \
 
 LOCAL_SRC_FILES := \
 	$(subst $(LOCAL_PATH)/,,$(shell find $(LOCAL_PATH) -name "*.cpp" -print)) \
@@ -20,6 +21,7 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_LIBRARIES := \
 	logger \
 	fs \
+	multitask \
 
 include $(BUILD_STATIC_LIBRARY)	
 
