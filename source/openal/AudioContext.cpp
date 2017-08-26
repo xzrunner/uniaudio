@@ -3,10 +3,7 @@
 #include "uniaudio/openal/Source.h"
 #include "uniaudio/AudioData.h"
 #include "uniaudio/DecoderFactory.h"
-
-#include <multitask/Thread.h>
-#include <multitask/Task.h>
-#include <multitask/ThreadPool.h>
+#include "uniaudio/Callback.h"
 
 #include <stddef.h>
 #include <assert.h>
@@ -19,19 +16,10 @@ namespace openal
 const float AudioContext::BUFFER_TIME_LEN = 0.01f;
 
 static void
-thread_update_cb(void* arg)
+update_cb(void* arg)
 {
-// 	AudioPool* pool = static_cast<AudioPool*>(arg);
-// 	pool->Update();	
-}
-
-static void
-task_update_cb(void* arg)
-{
-// 	mt::Task* t = mt::TaskPool::Instance()->Fetch();
-// 	assert(t);
-// 	static_cast<mt::CommonTask*>(t)->SetUpdateCB(thread_update_cb, arg);
-// 	mt::ThreadPool::Instance()->AddTask(t);
+	AudioPool* pool = static_cast<AudioPool*>(arg);
+	pool->Update();	
 }
 
 AudioContext::AudioContext()
@@ -43,7 +31,7 @@ AudioContext::AudioContext()
 
 AudioContext::~AudioContext()
 {
-//	mt::ThreadPool::Instance()->UnregisterUpdateCB(task_update_cb);
+	Callback::UnregisterAsyncUpdate(update_cb);
 
 	delete m_pool;
 
@@ -89,7 +77,7 @@ bool AudioContext::Init()
 
 	m_pool = new AudioPool();
 
-//	mt::ThreadPool::Instance()->RegisterUpdateCB(task_update_cb, m_pool);
+	Callback::RegisterAsyncUpdate(update_cb, m_pool);
 
 	return true;
 }
