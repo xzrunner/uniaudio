@@ -6,7 +6,6 @@
 #include <multitask/Thread.h>
 #include <multitask/Task.h>
 #include <multitask/ThreadPool.h>
-#include <multitask/TaskPool.h>
 
 #include <assert.h>
 #include <stddef.h>
@@ -23,17 +22,17 @@ const SLEnvironmentalReverbSettings AudioContext::m_reverb_settings = SL_I3DL2_E
 static void
 thread_update_cb(void* arg)
 {
-	AudioPool* pool = static_cast<AudioPool*>(arg);
-	pool->Update();	
+// 	AudioPool* pool = static_cast<AudioPool*>(arg);
+// 	pool->Update();	
 }
 
 static void
 task_update_cb(void* arg)
 {
-	mt::Task* t = mt::TaskPool::Instance()->Fetch();
-	assert(t);
-	static_cast<mt::CommonTask*>(t)->SetUpdateCB(thread_update_cb, arg);
-	mt::ThreadPool::Instance()->AddTask(t);
+// 	mt::Task* t = mt::TaskPool::Instance()->Fetch();
+// 	assert(t);
+// 	static_cast<mt::CommonTask*>(t)->SetUpdateCB(thread_update_cb, arg);
+// 	mt::ThreadPool::Instance()->AddTask(t);
 }
 
 AudioContext::AudioContext()
@@ -46,7 +45,7 @@ AudioContext::AudioContext()
 
 	m_pool = new AudioPool(this);
 
-	mt::ThreadPool::Instance()->RegisterUpdateCB(task_update_cb, m_pool);
+//	mt::ThreadPool::Instance()->RegisterUpdateCB(task_update_cb, m_pool);
 }
 
 AudioContext::~AudioContext()
@@ -58,7 +57,7 @@ AudioContext::~AudioContext()
 		(*m_output_mix_obj)->Destroy(m_output_mix_obj);
 	}
 
-	mt::ThreadPool::Instance()->UnregisterUpdateCB(task_update_cb);
+//	mt::ThreadPool::Instance()->UnregisterUpdateCB(task_update_cb);
 
 	delete m_pool;
 }
