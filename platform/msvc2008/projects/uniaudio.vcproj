@@ -433,6 +433,14 @@
 			Name="utility"
 			>
 			<File
+				RelativePath="..\..\..\source\Callback.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\uniaudio\Callback.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\Exception.cpp"
 				>
 			</File>
