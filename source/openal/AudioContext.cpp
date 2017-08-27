@@ -47,7 +47,7 @@ ua::Source* AudioContext::CreateSource(const AudioData* data)
 
 ua::Source* AudioContext::CreateSource(Decoder* decoder)
 {
-	return new Source(m_pool, decoder, true);
+	return new Source(m_pool, decoder, false);
 }
 
 ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)

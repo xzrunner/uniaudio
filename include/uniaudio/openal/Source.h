@@ -32,11 +32,17 @@ public:
 	virtual void Resume();
 	virtual void Rewind();
 
+	virtual void Seek(float offset);
+	virtual float Tell();
+
 	void PlayImpl();
 	void StopImpl();
 	void PauseImpl();
 	void ResumeImpl();
 	void RewindImpl();
+
+	void SeekImpl(float offset);
+	float TellImpl();
 
 	void SetLooping(bool looping);
 	bool IsLooping() const { return m_looping; }
@@ -59,6 +65,9 @@ private:
 
 	int Stream(ALuint buffer);
 
+//	int GetFreq() const;
+	float GetCurrOffset(int freq);
+
 private:
 	static const int OUTPUT_BUF_COUNT = 16;
 
@@ -68,6 +77,9 @@ private:
 	bool m_looping;
 	bool m_active;
 	bool m_paused;
+
+	int m_freq;
+	float m_offset;	// seconds
 
 	const bool m_stream;
 	const bool m_mix;

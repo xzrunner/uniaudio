@@ -33,6 +33,9 @@ public:
 	virtual void Resume();
 	virtual void Rewind();
 
+	virtual void Seek(float offset) {}
+	virtual float Tell() { return 0; }
+
 	void PlayImpl();
 	void StopImpl();
 	void PauseImpl();

@@ -186,6 +186,18 @@ void AudioPool::Rewind(Source* source)
 	source->RewindImpl();
 }
 
+void AudioPool::Seek(Source* source, float offset)
+{
+	mt::Lock lock(m_mutex);
+	source->SeekImpl(offset);
+}
+
+float AudioPool::Tell(Source* source)
+{
+	mt::Lock lock(m_mutex);
+	return source->Tell();
+}
+
 /************************************************************************/
 /* class AudioPool::QueuePlayer                                         */
 /************************************************************************/

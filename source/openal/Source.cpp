@@ -22,6 +22,8 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_freq(data->GetSampleRate())
+	, m_offset(0)
 	, m_stream(false)
 	, m_mix(false)
 	, m_ibuf(NULL)
@@ -56,6 +58,8 @@ Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_freq(decoder->GetSampleRate())
+	, m_offset(0)
 	, m_stream(true)
 	, m_mix(mix)
 	, m_ibuf(NULL)
@@ -130,14 +134,20 @@ bool Source::Update()
 		alGetSourcei(m_player, AL_BUFFERS_PROCESSED, &processed);
 		while (processed--)
 		{
+			float old_offset_seconds = GetCurrOffset(m_freq);
+
 			ALuint buffer;
 			alSourceUnqueueBuffers(m_player, 1, &buffer);
+
+			float new_offset_seconds = GetCurrOffset(m_freq);
+			m_offset += old_offset_seconds - new_offset_seconds;
+
 			Stream(buffer);
 			alSourceQueueBuffers(m_player, 1, &buffer);
 		}
 	}
 
-	return true;
+ 	return true;
 }
 
 void Source::Play()
@@ -178,6 +188,16 @@ void Source::Resume()
 void Source::Rewind()
 {
 	m_pool->Rewind(this);
+}
+
+void Source::Seek(float offset)
+{
+	m_pool->Seek(this, offset);
+}
+
+float Source::Tell()
+{
+	return m_pool->Tell(this);
 }
 
 void Source::PlayImpl()
@@ -309,6 +329,45 @@ void Source::RewindImpl()
 	}
 }
 
+void Source::SeekImpl(float offset)
+{
+	if (!m_active) {
+		return;
+	}
+
+	if (m_stream) 
+	{
+		m_offset = offset;
+		m_ibuf->GetDecoder()->Seek(offset);
+
+		bool paused = m_paused;
+		StopImpl();
+		PlayImpl();
+		if (paused) {
+			PauseImpl();
+		}
+	} 
+	else 
+	{
+		alSourcef(m_player, AL_SEC_OFFSET, offset);
+	}
+}
+
+float Source::TellImpl()
+{
+	if (!m_active) {
+		return 0;
+	}
+
+	float offset;
+	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset);
+	offset /= m_freq;
+	if (m_stream) {
+		offset += m_offset;
+	}
+	return offset;
+}
+
 void Source::SetLooping(bool looping)
 {
 	if (m_active && !m_stream) {
@@ -321,7 +380,7 @@ void Source::SetLooping(bool looping)
 void Source::SetPlayer(ALuint player) 
 { 
 	assert(!m_mix); 
-	m_player = player; 
+	m_player = player;
 }
 
 bool Source::IsStopped() const
@@ -398,6 +457,27 @@ int Source::Stream(ALuint buffer)
 	}
 
 	return decoded;
+}
+
+//int Source::GetFreq() const
+//{
+//	int freq;
+//	ALint b;
+//	alGetSourcei(m_player, AL_BUFFER, &b);
+//	alGetBufferi(b, AL_FREQUENCY, &freq);
+//
+//	assert(freq == m_freq);
+//	
+//	return freq;
+//}
+
+float Source::GetCurrOffset(int freq)
+{
+	assert(freq != 0);
+	float offset_samples;
+	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset_samples);
+	float offset_seconds = offset_samples / freq;
+	return offset_seconds;
 }
 
 }

@@ -21,6 +21,9 @@ public:
 	virtual void Resume() = 0;
 	virtual void Rewind() = 0;
 
+	virtual void Seek(float offset) = 0;
+	virtual float Tell() = 0;
+
 }; // Source
 
 }
