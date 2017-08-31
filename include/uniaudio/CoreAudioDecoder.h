@@ -5,6 +5,13 @@
 
 #include "uniaudio/Decoder.h"
 
+#include <AudioToolbox/AudioFormat.h>
+#include <AudioToolbox/ExtendedAudioFile.h>
+
+#include <fs_file.h>
+
+#include <string>
+
 namespace ua
 {
 
@@ -27,7 +34,7 @@ public:
 private:
 	void CloseAudioFile();
 
-private:
+public:
 	struct Data
 	{
 		Data() : file(NULL), size(0) {}

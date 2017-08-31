@@ -14,7 +14,7 @@ public:
 	Exception(const char* fmt, ...);
 	virtual ~Exception() throw() {}
 
-	inline virtual const char* What() const throw() { 
+	inline virtual const char* what() const throw() { 
 		return m_message.c_str(); 
 	}
 

@@ -1,6 +1,9 @@
 #ifdef UA_SUPPORT_COREAUDIO
 
 #include "uniaudio/CoreAudioDecoder.h"
+#include "uniaudio/Exception.h"
+
+#include <vector>
 
 namespace ua
 {
@@ -10,12 +13,13 @@ namespace
 {
 OSStatus read_func(void* in_client_data, SInt64 in_position, UInt32 request_count, void* buffer, UInt32* actual_count)
 {
-	Data* data = (Data*)in_client_data;
+	CoreAudioDecoder::Data* data = (CoreAudioDecoder::Data*)in_client_data;
 	SInt64 bytes_left = data->size - in_position;
 
 	if (bytes_left > 0)
 	{
 		UInt32 actual_size = bytes_left >= request_count ? request_count : (UInt32) bytes_left;
+		fs_seek_from_head(data->file, in_position);
 		fs_read(data->file, buffer, actual_size);
 		*actual_count = actual_size;
 	}
@@ -30,7 +34,7 @@ OSStatus read_func(void* in_client_data, SInt64 in_position, UInt32 request_coun
 
 SInt64 get_size_func(void* in_client_data)
 {
-	Data* data = (Data*)in_client_data;
+	CoreAudioDecoder::Data* data = (CoreAudioDecoder::Data*)in_client_data;
 	return data->size;
 }
 } // callbacks
@@ -59,7 +63,7 @@ CoreAudioDecoder::CoreAudioDecoder(const std::string& filepath, int buf_sz)
 		// We want to use the Extended AudioFile API.
 		err = ExtAudioFileWrapAudioFileID(m_audio_file, false, &m_ext_audio_file);
 		if (err != noErr) {
-			throw Exception("Could not open audio file for decoding.");
+			throw Exception("Could not get extended api for decoding.");
 		}
 
 		// Get the format of the audio data.
@@ -118,7 +122,7 @@ int CoreAudioDecoder::Decode()
 		AudioBufferList data_buffer;
 		data_buffer.mNumberBuffers = 1;
 		data_buffer.mBuffers[0].mDataByteSize = m_buf_size - size;
-		data_buffer.mBuffers[0].mData = (char *) buffer + size;
+		data_buffer.mBuffers[0].mData = (char *) m_buf + size;
 		data_buffer.mBuffers[0].mNumberChannels = m_output_info.mChannelsPerFrame;
 
 		UInt32 frames = (m_buf_size - size) / m_output_info.mBytesPerFrame;
@@ -129,7 +133,7 @@ int CoreAudioDecoder::Decode()
 
 		if (frames == 0)
 		{
-			eof = true;
+			m_eof = true;
 			break;
 		}
 
@@ -145,7 +149,7 @@ bool CoreAudioDecoder::Seek(float s)
 
 	if (err == noErr)
 	{
-		eof = false;
+		m_eof = false;
 		return true;
 	}
 
@@ -158,7 +162,7 @@ bool CoreAudioDecoder::Rewind()
 
 	if (err == noErr)
 	{
-		eof = false;
+		m_eof = false;
 		return true;
 	}
 
@@ -200,7 +204,6 @@ bool CoreAudioDecoder::Accepts(const std::string& ext)
 	CFArrayRef exts = NULL;
 	size = sizeof(CFArrayRef);
 
-//	for (UInt32 type : types)
 	for (int i = 0, n = types.size(); i < n; ++i)
 	{
 		UInt32 type = types[i];
