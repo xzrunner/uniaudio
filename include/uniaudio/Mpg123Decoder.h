@@ -1,3 +1,5 @@
+#ifndef UA_NO_MPG123
+
 #ifndef _UNIAUDIO_MPG123_DECODER_H_
 #define _UNIAUDIO_MPG123_DECODER_H_
 
@@ -48,3 +50,5 @@ private:
 }
 
 #endif // _UNIAUDIO_MPG123_DECODER_H_
+
+#endif // UA_NO_MPG123

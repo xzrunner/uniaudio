@@ -1,3 +1,5 @@
+#ifndef UA_NO_MPG123
+
 #include "uniaudio/Mpg123Decoder.h"
 
 #include <fs_file.h>
@@ -246,3 +248,5 @@ void Mpg123Decoder::InitMpg123()
 }
 
 }
+
+#endif // UA_NO_MPG123
