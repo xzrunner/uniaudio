@@ -15,7 +15,7 @@ namespace ua
 class Mpg123Decoder : public Decoder
 {
 public:
-	Mpg123Decoder(const std::string& filepath, int buf_sz = DEFAULT_BUFFER_SIZE);
+	Mpg123Decoder(const std::string& filepath, int buf_sz);
 	virtual ~Mpg123Decoder();
 
 	virtual int Decode();
@@ -25,6 +25,8 @@ public:
 
 	virtual int GetChannels() const;
 	virtual int GetBitDepth() const;
+
+	static bool Accepts(const std::string& ext);
 
 	static void Quit();
 

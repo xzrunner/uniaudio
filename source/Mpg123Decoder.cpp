@@ -95,6 +95,11 @@ int Mpg123Decoder::GetBitDepth() const
 	return 16;
 }
 
+bool Mpg123Decoder::Accepts(const std::string& ext)
+{
+	return ext == "mp3";
+}
+
 void Mpg123Decoder::Quit()
 {
 	if (m_inited) {
@@ -103,6 +108,9 @@ void Mpg123Decoder::Quit()
 	}
 }
 
+// callbacks
+namespace
+{
 static ssize_t read_callback(void* udata, void* buffer, size_t count)
 {
 	if (!udata) {
@@ -122,6 +130,7 @@ static ssize_t read_callback(void* udata, void* buffer, size_t count)
 	// Returns the number of written bytes. 0 means EOF.
 	return count_write;
 }
+} // callbacks
 
 static off_t seek_callback(void* udata, off_t offset, int whence)
 {

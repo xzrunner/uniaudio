@@ -11,7 +11,7 @@ namespace ua
 class CoreAudioDecoder : public Decoder
 {
 public:	
-	CoreAudioDecoder(const std::string& filepath, int buf_sz = DEFAULT_BUFFER_SIZE);
+	CoreAudioDecoder(const std::string& filepath, int buf_sz);
 	virtual ~CoreAudioDecoder();
 
 	virtual int Decode();
@@ -21,6 +21,8 @@ public:
 
 	virtual int GetChannels() const;
 	virtual int GetBitDepth() const;
+
+	static bool Accepts(const std::string& ext);
 
 private:
 	void CloseAudioFile();

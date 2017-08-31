@@ -175,6 +175,61 @@ int CoreAudioDecoder::GetBitDepth() const
 	return m_output_info.mBitsPerChannel;
 }
 
+bool CoreAudioDecoder::Accepts(const std::string& ext)
+{
+	UInt32 size = 0;
+	std::vector<UInt32> types;
+
+	// Get the size in bytes of the type array we're about to get.
+	OSStatus err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_ReadableTypes, sizeof(UInt32), NULL, &size);
+	if (err != noErr) {
+		return false;
+	}
+
+	types.resize(size / sizeof(UInt32));
+
+	// Get an array of supported types.
+	err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_ReadableTypes, 0, NULL, &size, &types[0]);
+	if (err != noErr) {
+		return false;
+	}
+
+	// Turn the extension string into a CFStringRef.
+	CFStringRef extstr = CFStringCreateWithCString(NULL, ext.c_str(), kCFStringEncodingUTF8);
+
+	CFArrayRef exts = NULL;
+	size = sizeof(CFArrayRef);
+
+//	for (UInt32 type : types)
+	for (int i = 0, n = types.size(); i < n; ++i)
+	{
+		UInt32 type = types[i];
+
+		// Get the extension strings for the type.
+		err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_ExtensionsForType, sizeof(UInt32), &type, &size, &exts);
+		if (err != noErr)
+			continue;
+
+		// A type can have more than one extension string.
+		for (CFIndex i = 0; i < CFArrayGetCount(exts); i++)
+		{
+			CFStringRef value = (CFStringRef) CFArrayGetValueAtIndex(exts, i);
+
+			if (CFStringCompare(extstr, value, 0) == kCFCompareEqualTo)
+			{
+				CFRelease(extstr);
+				CFRelease(exts);
+				return true;
+			}
+		}
+
+		CFRelease(exts);
+	}
+
+	CFRelease(extstr);
+	return false;
+}
+
 void CoreAudioDecoder::CloseAudioFile()
 {
 	if (m_ext_audio_file) {
