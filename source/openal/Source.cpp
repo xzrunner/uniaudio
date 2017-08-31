@@ -142,10 +142,7 @@ bool Source::Update()
 			float new_offset_seconds = GetCurrOffset(m_freq);
 			m_offset += old_offset_seconds - new_offset_seconds;
 
-			int size = Stream(buffer);
-			if(size<=0){
-				break;
-			}
+			Stream(buffer);
 			alSourceQueueBuffers(m_player, 1, &buffer);
 		}
 	}
@@ -449,16 +446,14 @@ int Source::Stream(ALuint buffer)
 
 	int decoded = d->Decode();
 
-	if(decoded>0) {
-		int fmt = GetFormat(d->GetChannels(), d->GetBitDepth());
-		if (fmt != 0) {
-			alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
-		}
+	int fmt = GetFormat(d->GetChannels(), d->GetBitDepth());
+	if (fmt != 0) {
+		alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
+	}
 
-		if (d->IsFinished() && IsLooping())
-		{
-			d->Rewind();
-		}
+	if (d->IsFinished() && IsLooping())
+	{
+		d->Rewind();
 	}
 
 	return decoded;
