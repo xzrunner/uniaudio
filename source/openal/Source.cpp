@@ -142,8 +142,9 @@ bool Source::Update()
 			float new_offset_seconds = GetCurrOffset(m_freq);
 			m_offset += old_offset_seconds - new_offset_seconds;
 
-			Stream(buffer);
-			alSourceQueueBuffers(m_player, 1, &buffer);
+			if (Stream(buffer) > 0) {
+				alSourceQueueBuffers(m_player, 1, &buffer);
+			}
 		}
 	}
 
@@ -209,7 +210,9 @@ void Source::PlayImpl()
 			int used = 0;
 			for (int i = 0; i < MAX_BUFFERS; ++i)
 			{
-				Stream(m_buffers[i]);
+				if (Stream(m_buffers[i]) == 0) {
+					break;
+				}
 				++used;
 				assert(m_ibuf);
 				if (m_ibuf->GetDecoder()->IsFinished()) {
@@ -443,12 +446,15 @@ int Source::Stream(ALuint buffer)
 {
 	assert(m_ibuf && !m_mix);
 	Decoder* d = m_ibuf->GetDecoder();
-
-	int decoded = d->Decode();
-
-	int fmt = GetFormat(d->GetChannels(), d->GetBitDepth());
-	if (fmt != 0) {
-		alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
+	int decoded = std::max(d->Decode(), 0);
+	if (decoded > 0)
+	{
+		int fmt = GetFormat(d->GetChannels(), d->GetBitDepth());
+		if (fmt != 0) {
+			alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
+		} else {
+			decoded = 0;			
+		}
 	}
 
 	if (d->IsFinished() && IsLooping())
