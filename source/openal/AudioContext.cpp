@@ -106,7 +106,7 @@ void AudioContext::Rewind()
 void AudioContext::Initialize()
 {
 	try {
-		if (!m_own_ctx)
+		if (m_own_ctx)
 		{
 			m_device = alcOpenDevice(NULL);
 			if (!m_device) {
