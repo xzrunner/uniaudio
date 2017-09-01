@@ -15,6 +15,7 @@ class AudioContext : public ua::AudioContext
 {
 public:
 	AudioContext();
+	AudioContext(ALCdevice* device, ALCcontext* context);
 	virtual ~AudioContext();
 
 	virtual ua::Source* CreateSource(const AudioData* data);
@@ -32,9 +33,12 @@ public:
 
 private:
 	void Initialize();
+	void Initialize(ALCdevice* device, ALCcontext* context);
 	void Terminate();
 
-private:	
+private:
+	bool m_own_ctx;
+
 	ALCdevice* m_device;
 
 	ALCcontext* m_context;

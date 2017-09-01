@@ -23,8 +23,18 @@ update_cb(void* arg)
 }
 
 AudioContext::AudioContext()
-	: m_device(NULL)
+	: m_own_ctx(true)
+	, m_device(NULL)
 	, m_context(NULL)
+	, m_pool(NULL)
+{
+	Initialize();
+}
+
+AudioContext::AudioContext(ALCdevice* device, ALCcontext* context)
+	: m_own_ctx(false)
+	, m_device(device)
+	, m_context(context)
 	, m_pool(NULL)
 {
 	Initialize();
@@ -96,14 +106,17 @@ void AudioContext::Rewind()
 void AudioContext::Initialize()
 {
 	try {
-		m_device = alcOpenDevice(NULL);
-		if (!m_device) {
-			throw Exception("Could not open openal device.");
-		}
+		if (!m_own_ctx)
+		{
+			m_device = alcOpenDevice(NULL);
+			if (!m_device) {
+				throw Exception("Could not open openal device.");
+			}
 
-		m_context = alcCreateContext(m_device, NULL);
-		if (!m_context) {
-			throw Exception("Could not create openal context.");
+			m_context = alcCreateContext(m_device, NULL);
+			if (!m_context) {
+				throw Exception("Could not create openal context.");
+			}
 		}
 
 		if (!alcMakeContextCurrent(m_context) || alcGetError(m_device) != ALC_NO_ERROR) {
@@ -131,11 +144,14 @@ void AudioContext::Terminate()
 	}
 
 	alcMakeContextCurrent(NULL);
-	if (m_context) {
-		alcDestroyContext(m_context);
-	}
-	if (m_device) {
-		alcCloseDevice(m_device);
+	if (m_own_ctx)
+	{
+		if (m_context) {
+			alcDestroyContext(m_context);
+		}
+		if (m_device) {
+			alcCloseDevice(m_device);
+		}
 	}
 }
 
