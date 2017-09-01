@@ -4,9 +4,7 @@
 #include "uniaudio/Decoder.h"
 #include "uniaudio/InputBuffer.h"
 #include "uniaudio/OutputBuffer.h"
-
-#include <fault.h>
-#include <logger.h>
+#include "uniaudio/Exception.h"
 
 #include <assert.h>
 
@@ -18,9 +16,9 @@ namespace openal
 AudioPool::AudioPool()
 {
 	ALuint sources[NUM_ASSET_PLAYERS];
-	alGenSources(NUM_ASSET_PLAYERS, sources);
+	alGenSources(NUM_ASSET_PLAYERS, sources);	
 	if (alGetError() != AL_NO_ERROR) {
-		fault("openal gen sources.");
+		throw Exception("Could not openal sources.");
 	}
 
 	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i) {
@@ -207,43 +205,49 @@ QueuePlayer()
 	: m_source(0)
 	, m_mixer(AudioContext::BUFFER_TIME_LEN)
 {
+	bool inited_buffers = false;
+	memset(m_buffers, 0, sizeof(m_buffers));
+
 	alGetError();
 
-	ALenum err;
+	try {
+		ALenum err;
 
-	alGenSources(1, &m_source);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("AudioPool::QueuePlayer alGenSources error: %d\n", err);
-		return;
-	}
-
-	alGenBuffers(MAX_BUFFERS, m_buffers);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("AudioPool::QueuePlayer alGenBuffers error: %d\n", err);
-		return;
-	}
-
- 	ALenum fmt = AL_FORMAT_STEREO16;
- 	assert(AudioMixer::DEFAULT_BIT_DEPTH == 16 && AudioMixer::DEFAULT_CHANNELS == 2);
-	int16_t* buf = m_mixer.Output();
-	int buf_sz = m_mixer.GetBufSize();
-	for (int i = 0; i < MAX_BUFFERS; ++i) {
-		alBufferData(m_buffers[i], fmt, buf, buf_sz, AudioMixer::DEFAULT_SAMPLE_RATE);
+		alGenSources(1, &m_source);
 		if ((err = alGetError()) != AL_NO_ERROR)  {
-			LOGW("AudioPool::QueuePlayer alBufferData error: %d\n", err);
-			return;
+			throw Exception("AudioPool::QueuePlayer alGenSources error: %x\n", err);
 		}
-	}
-	alSourceQueueBuffers(m_source, MAX_BUFFERS, m_buffers);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("AudioPool::QueuePlayer alSourceQueueBuffers error: %d\n", err);
-		return;
-	}
 
-	alSourcePlay(m_source);
-	if (alGetError() != AL_NO_ERROR)  {
-		LOGW("AudioPool::QueuePlayer alSourcePlay error: %d\n", err);
-		return;
+		alGenBuffers(MAX_BUFFERS, m_buffers);
+		if ((err = alGetError()) != AL_NO_ERROR)  {
+			throw Exception("AudioPool::QueuePlayer alGenBuffers error: %x\n", err);
+		}
+		inited_buffers = true;
+
+		ALenum fmt = AL_FORMAT_STEREO16;
+		assert(AudioMixer::DEFAULT_BIT_DEPTH == 16 && AudioMixer::DEFAULT_CHANNELS == 2);
+		int16_t* buf = m_mixer.Output();
+		int buf_sz = m_mixer.GetBufSize();
+		for (int i = 0; i < MAX_BUFFERS; ++i) {
+			alBufferData(m_buffers[i], fmt, buf, buf_sz, AudioMixer::DEFAULT_SAMPLE_RATE);
+			if ((err = alGetError()) != AL_NO_ERROR)  {
+				throw Exception("AudioPool::QueuePlayer alBufferData error: %x\n", err);
+			}
+		}
+		alSourceQueueBuffers(m_source, MAX_BUFFERS, m_buffers);
+		if ((err = alGetError()) != AL_NO_ERROR)  {
+			throw Exception("AudioPool::QueuePlayer alSourceQueueBuffers error: %x\n", err);
+		}
+
+		alSourcePlay(m_source);
+		if (alGetError() != AL_NO_ERROR)  {
+			throw Exception("AudioPool::QueuePlayer alSourcePlay error: %x\n", err);
+		}
+	} catch (Exception&) {
+		if (inited_buffers) {
+			alDeleteBuffers(MAX_BUFFERS, m_buffers);
+		}
+		throw;
 	}
 }
 

@@ -99,6 +99,9 @@ void AudioData::LoadFromList(const std::vector<ua::AudioData*>& list)
 		const ua::AudioData* src = list[0];
 		m_size = src->m_size;
 		m_data = static_cast<uint8_t*>(malloc(src->m_size));
+		if (!m_data) {
+			throw Exception("Could not malloc buf.");
+		}
 		memcpy(m_data, src->m_data, m_size);
 		m_sample_rate = src->m_sample_rate;
 		m_channels = src->m_channels;

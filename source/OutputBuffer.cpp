@@ -1,8 +1,8 @@
 #include "uniaudio/OutputBuffer.h"
+#include "uniaudio/Exception.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 namespace ua
 {
@@ -82,7 +82,7 @@ void OutputBuffer::Init(int count, int size)
 	{
 		void* ptr = malloc(sz);
 		if (!ptr) {
-			break;
+			throw Exception("malloc fail.");
 		}
 		Buffer* buf = new (ptr) Buffer;
 		memset(buf, 0, sz);

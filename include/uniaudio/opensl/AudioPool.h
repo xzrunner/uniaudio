@@ -44,7 +44,7 @@ public:
 
 private:
 	void CreateAssetsAudioPlayer();
-	bool CreateBufferQueueAudioPlayer();
+	void CreateBufferQueueAudioPlayer();
 
 	void EnqueueAllBuffers();
 

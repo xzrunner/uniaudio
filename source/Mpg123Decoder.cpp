@@ -1,9 +1,9 @@
 #ifndef UA_NO_MPG123
 
 #include "uniaudio/Mpg123Decoder.h"
+#include "uniaudio/Exception.h"
 
 #include <fs_file.h>
-#include <fault.h>
 
 #include <cstdio>
 
@@ -242,7 +242,7 @@ void Mpg123Decoder::InitMpg123()
 
 	int ret = mpg123_init();
 	if (ret != MPG123_OK) {
-		fault("Init mpg123 error.");
+		throw Exception("Could not init mpg123.");
 	}
 	m_inited = true;
 }

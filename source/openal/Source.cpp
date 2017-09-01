@@ -5,8 +5,7 @@
 #include "uniaudio/Decoder.h"
 #include "uniaudio/OutputBuffer.h"
 #include "uniaudio/InputBuffer.h"
-
-#include <logger.h>
+#include "uniaudio/Exception.h"
 
 #include <assert.h>
 
@@ -30,26 +29,30 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	, m_obuf(NULL)
 	, m_player(0)
 {
+	memset(m_buffers, 0, sizeof(m_buffers));
+
 	alGetError();
 
-	ALenum err;
+	try {
+		ALenum err;
 
-	alGenBuffers(1, m_buffers);
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("alGenBuffers error: %p", data);
-		return;
-	}
+		alGenBuffers(1, m_buffers);
+		if ((err = alGetError()) != AL_NO_ERROR)  {
+			throw Exception("Gen openal buffers error: %x\n", err);
+		}
 
-	ALenum fmt = GetFormat(data->GetChannels(), data->GetBitDepth());
-	if (fmt == 0) {
-		LOGW("err fmt: %p", data);
-		return;
-	}
+		ALenum fmt = GetFormat(data->GetChannels(), data->GetBitDepth());
+		if (fmt == 0) {
+			throw Exception("Source error fmt: %d\n", fmt);
+		}
 
-	alBufferData(m_buffers[0], fmt, data->GetData(), data->GetSize(), data->GetSampleRate());
-	if ((err = alGetError()) != AL_NO_ERROR)  {
-		LOGW("alBufferData error: %p", data);
-		return;
+		alBufferData(m_buffers[0], fmt, data->GetData(), data->GetSize(), data->GetSampleRate());
+		if ((err = alGetError()) != AL_NO_ERROR)  {
+			throw Exception("Commit buffer data error: %x\n", err);
+		}
+	} catch (Exception&) {
+		alDeleteBuffers(1, m_buffers);
+		throw;		
 	}
 }
 
@@ -67,6 +70,9 @@ Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 	, m_player(0)
 {
 	m_ibuf = new InputBuffer(decoder);
+	if (!m_ibuf) {
+		throw Exception("Could not create InputBuffer.");
+	}
 
 	if (m_mix)
 	{
@@ -76,14 +82,16 @@ Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 		const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 		int buf_sz = depth * channels * samples / 8;
 		m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
+		if (!m_obuf) {
+			throw Exception("Could not create OutputBuffer.");
+		}
 	}
 	else
 	{
 		alGetError();
 		alGenBuffers(MAX_BUFFERS, m_buffers);
-		if (alGetError() != AL_NO_ERROR)  {
-			LOGW("alGenBuffers error: %p", decoder);
-			return;
+		if (ALenum err = alGetError() != AL_NO_ERROR)  {
+			throw Exception("Gen openal buffers error: %x\n", err);
 		}
 	}
 }
@@ -229,8 +237,7 @@ void Source::PlayImpl()
 		assert(!m_mix);
 		alSourcei(m_player, AL_BUFFER, m_buffers[0]);
 		if (alGetError() != AL_NO_ERROR)  {
-			LOGW("%s", "Source::PlayImpl bind buffer error");
-			return;
+			throw Exception("Source::PlayImpl bind buffer error.");
 		}
 	}
 
@@ -238,8 +245,7 @@ void Source::PlayImpl()
 	{
 		alSourcePlay(m_player);
 		if (alGetError() != AL_NO_ERROR)  {
-			LOGW("%s", "Source::PlayImpl alSourcePlay error");
-			return;
+			throw Exception("Source::PlayImpl alSourcePlay error.");
 		}
 	}
 

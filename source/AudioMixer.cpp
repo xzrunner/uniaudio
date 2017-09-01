@@ -1,4 +1,5 @@
 #include "uniaudio/AudioMixer.h"
+#include "uniaudio/Exception.h"
 
 #include <algorithm>
 
@@ -14,10 +15,14 @@ AudioMixer::AudioMixer(float buf_time_len)
 	m_mix_buffer = new int32_t[m_samples * DEFAULT_CHANNELS];
 	if (m_mix_buffer) {
 		memset(m_mix_buffer, 0, sizeof(int32_t) * m_samples * DEFAULT_CHANNELS);
+	} else {
+		throw Exception("Could not create m_mix_buffer.");
 	}
 	m_out_buffer = new int16_t[m_samples * DEFAULT_CHANNELS];
 	if (m_out_buffer) {
 		memset(m_out_buffer, 0, sizeof(int16_t) * m_samples * DEFAULT_CHANNELS);
+	} else {
+		throw Exception("Could not create m_out_buffer.");
 	}
 }
 

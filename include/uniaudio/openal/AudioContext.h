@@ -26,7 +26,8 @@ public:
 	static const float BUFFER_TIME_LEN;
 
 private:
-	bool Init();
+	void Initialize();
+	void Terminate();
 
 private:	
 	ALCdevice* m_device;

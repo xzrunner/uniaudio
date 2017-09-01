@@ -4,9 +4,9 @@
 #include "uniaudio/AudioData.h"
 #include "uniaudio/DecoderFactory.h"
 #include "uniaudio/Callback.h"
+#include "uniaudio/Exception.h"
 
 #include <stddef.h>
-#include <assert.h>
 
 namespace ua
 {
@@ -25,33 +25,39 @@ update_cb(void* arg)
 AudioContext::AudioContext()
 	: m_device(NULL)
 	, m_context(NULL)
+	, m_pool(NULL)
 {
-	Init();
+	Initialize();
 }
 
 AudioContext::~AudioContext()
 {
-	Callback::UnregisterAsyncUpdate(update_cb);
-
-	delete m_pool;
-
-	alcMakeContextCurrent(NULL);
-	alcDestroyContext(m_context);
-	alcCloseDevice(m_device);
+	Terminate();
 }
 
 ua::Source* AudioContext::CreateSource(const AudioData* data)
 {
-	return new Source(m_pool, data);
+	if (!m_pool) {
+		return NULL;
+	} else {
+		return new Source(m_pool, data);
+	}
 }
 
 ua::Source* AudioContext::CreateSource(Decoder* decoder)
 {
-	return new Source(m_pool, decoder, false);
+	if (!m_pool) {
+		return NULL;
+	} else {
+		return new Source(m_pool, decoder, false);
+	}
 }
 
 ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
 {
+	if (!m_pool) {
+		return NULL;
+	}
 	if (stream) {
 		return new Source(m_pool, DecoderFactory::Create(filepath));
 	} else {
@@ -59,27 +65,50 @@ ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
 	}
 }
 
-bool AudioContext::Init()
+void AudioContext::Initialize()
 {
-	m_device = alcOpenDevice(NULL);
-	if (!m_device) {
-		return false;
+	try {
+		m_device = alcOpenDevice(NULL);
+		if (!m_device) {
+			throw Exception("Could not open openal device.");
+		}
+
+		m_context = alcCreateContext(m_device, NULL);
+		if (!m_context) {
+			throw Exception("Could not create openal context.");
+		}
+
+		if (!alcMakeContextCurrent(m_context) || alcGetError(m_device) != ALC_NO_ERROR) {
+			throw Exception("Could not bind openal context.");
+		}
+
+		m_pool = new AudioPool();
+		if (!m_pool) {
+			throw Exception("Could not create pool.");
+		}
+
+		Callback::RegisterAsyncUpdate(update_cb, m_pool);
+	} catch (Exception&) {
+		Terminate();
+		throw;
 	}
-	
-	m_context = alcCreateContext(m_device, NULL);
-	if (!m_context) {
-		return false;
+}
+
+void AudioContext::Terminate()
+{
+	Callback::UnregisterAsyncUpdate(update_cb);
+
+	if (m_pool) {
+		delete m_pool;
 	}
 
-	if (!alcMakeContextCurrent(m_context) || alcGetError(m_device) != ALC_NO_ERROR) {
-		return false;
+	alcMakeContextCurrent(NULL);
+	if (m_context) {
+		alcDestroyContext(m_context);
 	}
-
-	m_pool = new AudioPool();
-
-	Callback::RegisterAsyncUpdate(update_cb, m_pool);
-
-	return true;
+	if (m_device) {
+		alcCloseDevice(m_device);
+	}
 }
 
 }

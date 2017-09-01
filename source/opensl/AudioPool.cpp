@@ -4,9 +4,10 @@
 #include "uniaudio/Decoder.h"
 #include "uniaudio/InputBuffer.h"
 #include "uniaudio/OutputBuffer.h"
+#include "uniaudio/Exception.h"
 
-#include <assert.h>
 #include <stddef.h>
+#include <assert.h>
 
 namespace ua
 {
@@ -83,7 +84,10 @@ bool AudioPool::Play(Source* source)
 
 		AssetPlayer* player = m_asset_player_freelist.front();
 		m_asset_player_freelist.pop();
-		InitAssetsAudioPlayer(player, source);
+		if (!InitAssetsAudioPlayer(player, source)) {
+			m_asset_player_freelist.push(player);
+			return false;
+		}
 
 		source->SetPlayer(player);	
 	}
@@ -245,8 +249,13 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 
 void AudioPool::CreateAssetsAudioPlayer()
 {
-	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i) {
-		m_asset_player_freelist.push(new AssetPlayer);
+	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i) 
+	{
+		AssetPlayer* player = new AssetPlayer;
+		if (!player) {
+			throw Exception("Could not create AssetPlayer.");
+		}
+		m_asset_player_freelist.push(player);
 	}
 }
 
@@ -256,7 +265,7 @@ static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
 	(static_cast<AudioPool*>(context))->ProcessSLCallback(bq);
 }
 
-bool AudioPool::CreateBufferQueueAudioPlayer()
+void AudioPool::CreateBufferQueueAudioPlayer()
 {
 	SLresult result;
 
@@ -290,29 +299,33 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
                                    /*SL_BOOLEAN_TRUE,*/ };
 
 	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &m_queue_player.object, &audioSrc, &audioSnk, 2, ids, req);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not create audio player.");
+	}
 
 	// realize the player
 	result = (*m_queue_player.object)->Realize(m_queue_player.object, SL_BOOLEAN_FALSE);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not realize the player.");
+	}
 
-	// get the m_queue_player.play interface
+	// get the play interface
 	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_PLAY, &m_queue_player.play);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not get the play interface.");
+	}
 
-	// get the buffer m_queue_player.queue interface
-	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_BUFFERQUEUE,
-		&m_queue_player.queue);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	// get the buffer queue interface
+	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_BUFFERQUEUE, &m_queue_player.queue);
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not get the buffer queue interface.");
+	}
 
-	// register callback on the buffer m_queue_player.queue
+	// register callback on the buffer queue
 	result = (*m_queue_player.queue)->RegisterCallback(m_queue_player.queue, bqPlayerCallback, this);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not register callback on the buffer queue.");
+	}
 
 // 	// get the effect send interface
 // 	m_queue_player.effect_send = NULL;
@@ -326,27 +339,31 @@ bool AudioPool::CreateBufferQueueAudioPlayer()
 #if 0   // mute/solo is not supported for sources that are known to be mono, as this is
 	// get the mute/solo interface
 	result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_MUTESOLO, &bqPlayerMuteSolo);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not get the mute/solo interface.");
+	}
 #endif
 
-	// get the m_queue_player.volume interface
+	// get the volume interface
 	result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_VOLUME, &m_queue_player.volume);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not get the volume interface.");
+	}
 
 	// set the player's state to playing
 	result = (*m_queue_player.play)->SetPlayState(m_queue_player.play, SL_PLAYSTATE_PLAYING);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
-
-	return true;
+	if (result!= SL_RESULT_SUCCESS) {
+		throw Exception("Could not set the player's state to playing.");
+	}
 }
 
 void AudioPool::EnqueueAllBuffers()
 {
 	int buf_sz = m_queue_mixer.GetBufSize();
 	void* buf = malloc(buf_sz);
+	if (!buf) {
+		throw Exception("Could not malloc buf.");
+	}
 	memset(buf, 0, buf_sz);
 	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i) {
  		SLresult result = (*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
@@ -367,64 +384,79 @@ static void asset_player_cb(SLPlayItf caller, void* context, SLuint32 play_event
 
 bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const Source* source)
 {
-	SLresult result;
+	bool ret = true;
 
-	SLDataLocator_AndroidFD loc_fd;
+	try {
+		SLresult result;
+
+		SLDataLocator_AndroidFD loc_fd;
 #ifdef __ANDROID__
-	bool loaded = m_ctx->LoadAssetFile(source->GetFilepath(), &loc_fd);
-	if (!loaded) {
-		return false;
-	}
+		bool loaded = m_ctx->LoadAssetFile(source->GetFilepath(), &loc_fd);
+		if (!loaded) {
+			throw Exception("Could not load asset file %s", source->GetFilepath().c_str());
+		}
 #endif // __ANDROID__
 
-	SLDataFormat_MIME format_mime = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
-	SLDataSource audioSrc = {&loc_fd, &format_mime};
+		SLDataFormat_MIME format_mime = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
+		SLDataSource audioSrc = {&loc_fd, &format_mime};
 
-	// configure audio sink
-	SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, m_ctx->GetOutputMix()};
-	SLDataSink audioSnk = {&loc_outmix, NULL};
+		// configure audio sink
+		SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, m_ctx->GetOutputMix()};
+		SLDataSink audioSnk = {&loc_outmix, NULL};
 
-	// create audio player
-	const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
-	const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-	result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &player->object, &audioSrc, &audioSnk,
-		3, ids, req);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// create audio player
+		const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
+		const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+		result = (*m_ctx->GetEngine())->CreateAudioPlayer(m_ctx->GetEngine(), &player->object, &audioSrc, &audioSnk, 3, ids, req);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not create audio player.");
+		}
 
-	// realize the player
-	result = (*player->object)->Realize(player->object, SL_BOOLEAN_FALSE);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// realize the player
+		result = (*player->object)->Realize(player->object, SL_BOOLEAN_FALSE);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not realize the player.");
+		}
 
-	// get the play interface
-	result = (*player->object)->GetInterface(player->object, SL_IID_PLAY, &player->play);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// get the play interface
+		result = (*player->object)->GetInterface(player->object, SL_IID_PLAY, &player->play);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not get the play interface.");
+		}
 
-	// get the seek interface
-	result = (*player->object)->GetInterface(player->object, SL_IID_SEEK, &player->seek);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// get the seek interface
+		result = (*player->object)->GetInterface(player->object, SL_IID_SEEK, &player->seek);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not get the seek interface.");
+		}
 
-	// get the mute/solo interface
-	result = (*player->object)->GetInterface(player->object, SL_IID_MUTESOLO, &player->mute_solo);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// get the mute/solo interface
+		result = (*player->object)->GetInterface(player->object, SL_IID_MUTESOLO, &player->mute_solo);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not get the mute/solo interface.");
+		}
 
-	// get the volume interface
-	result = (*player->object)->GetInterface(player->object, SL_IID_VOLUME, &player->volume);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// get the volume interface
+		result = (*player->object)->GetInterface(player->object, SL_IID_VOLUME, &player->volume);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not get the volume interface.");
+		}
 
-	// enable whole file looping
-	result = (*player->seek)->SetLoop(player->seek, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);
-	assert(SL_RESULT_SUCCESS == result);
-	(void)result;
+		// enable whole file looping
+		result = (*player->seek)->SetLoop(player->seek, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);
+		if (result!= SL_RESULT_SUCCESS) {
+			throw Exception("Could not enable whole file looping.");
+		}
 
-	(*player->play)->RegisterCallback(player->play, asset_player_cb, const_cast<Source*>(source));
+		(*player->play)->RegisterCallback(player->play, asset_player_cb, const_cast<Source*>(source));
+	} catch (Exception&) {
+		ret = false;
+		if (player->object) {
+			(*player->object)->Destroy(player->object);
+		}
+	}
 
-	return result == SL_RESULT_SUCCESS;
+	return ret;
 }
 
 }

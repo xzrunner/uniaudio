@@ -4,6 +4,7 @@
 #include "uniaudio/Decoder.h"
 #include "uniaudio/OutputBuffer.h"
 #include "uniaudio/InputBuffer.h"
+#include "uniaudio/Exception.h"
 
 #include <assert.h>
 
@@ -37,6 +38,9 @@ Source::Source(AudioPool* pool, Decoder* decoder)
 	, m_player(NULL)
 {
 	m_ibuf = new InputBuffer(decoder);
+	if (!m_ibuf) {
+		throw Exception("Could not create InputBuffer.");
+	}
 
 	const int HZ = decoder->GetSampleRate();
 	const int depth = decoder->GetBitDepth();
@@ -44,6 +48,9 @@ Source::Source(AudioPool* pool, Decoder* decoder)
 	const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 	int buf_sz = depth * channels * samples / 8;
 	m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
+	if (!m_obuf) {
+		throw Exception("Could not create OutputBuffer.");
+	}
 }
 
 Source::~Source()

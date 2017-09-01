@@ -46,7 +46,8 @@ public:
 	static const float BUFFER_TIME_LEN;
 
 private:
-	bool CreateEngine();
+	void Initialize();
+	void Terminate();
 
 private:
 	// engine interfaces
