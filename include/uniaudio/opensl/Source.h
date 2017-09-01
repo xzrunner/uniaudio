@@ -33,14 +33,17 @@ public:
 	virtual void Resume();
 	virtual void Rewind();
 
-	virtual void Seek(float offset) {}
-	virtual float Tell() { return 0; }
+	virtual void Seek(float offset);
+	virtual float Tell();
 
 	void PlayImpl();
 	void StopImpl();
 	void PauseImpl();
 	void ResumeImpl();
 	void RewindImpl();
+
+	void SeekImpl(float offset);
+	float TellImpl();
 
 	void SetLooping(bool looping);
 	bool IsLooping() const { return m_looping; }
@@ -61,6 +64,8 @@ public:
 
 	bool IsStream() const { return m_stream; }
 
+	void UpdataOffset(float dt) { m_offset += dt; }
+
 private:
 	void Stream();
 
@@ -73,6 +78,8 @@ private:
 	bool m_looping;
 	bool m_active;
 	bool m_paused;
+
+	float m_offset;	// seconds
 
 	const bool m_stream;
 

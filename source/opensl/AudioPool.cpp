@@ -190,6 +190,18 @@ void AudioPool::Rewind(Source* source)
 	source->RewindImpl();
 }
 
+void AudioPool::Seek(Source* source, float offset)
+{
+	mt::Lock lock(m_mutex);
+	source->SeekImpl(offset);
+}
+
+float AudioPool::Tell(Source* source)
+{
+	mt::Lock lock(m_mutex);
+	return source->Tell();
+}
+
 void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 {
 	assert(bq == m_queue_player.queue);
@@ -218,6 +230,10 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 		int hz = decoder->GetSampleRate();
 		int depth = decoder->GetBitDepth();
 		int channels = decoder->GetChannels();
+
+		float samples = buf_sz * 8.0f / depth / channels;
+		float offset = samples / hz;
+		source->UpdataOffset(offset);
 
 		m_queue_mixer.Input(buf, buf_sz, hz, depth, channels);
 	}

@@ -17,6 +17,7 @@ Source::Source(AudioPool* pool, const std::string& filepath)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_offset(0)
 	, m_stream(false)
 	, m_ibuf(NULL)
 	, m_obuf(NULL)
@@ -30,6 +31,7 @@ Source::Source(AudioPool* pool, Decoder* decoder)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
+	, m_offset(0)
 	, m_stream(true)
 	, m_ibuf(NULL)
 	, m_player(NULL)
@@ -89,6 +91,9 @@ void Source::Play()
 		return;
 	}
 	m_active = m_pool->Play(this);
+	if (!m_active) {
+		m_offset = 0;
+	}
 }
 
 void Source::Stop()
@@ -113,6 +118,16 @@ void Source::Rewind()
 	m_pool->Rewind(this);
 }
 
+void Source::Seek(float offset)
+{
+	m_pool->Seek(this, offset);
+}
+
+float Source::Tell()
+{
+	return m_pool->Tell(this);
+}
+
 void Source::PlayImpl()
 {
 	if (m_stream)
@@ -132,6 +147,8 @@ void Source::StopImpl()
 	if (!m_active) {
 		return;
 	}
+
+	m_offset = 0;
 
 	if (m_stream)
 	{
@@ -208,6 +225,38 @@ void Source::RewindImpl()
 			m_ibuf->DecoderRewind();
 		}
 	}
+}
+
+void Source::SeekImpl(float offset)
+{
+	if (!m_active) {
+		return;
+	}
+
+	if (m_stream)
+	{
+		m_offset = offset;
+
+		bool looping = IsLooping();
+		m_ibuf->Seek(offset, looping);
+		m_ibuf->Output(m_obuf, looping);
+
+		bool paused = m_paused;
+		StopImpl();
+		PlayImpl();
+		if (paused) {
+			PauseImpl();
+		}
+	}
+	else
+	{
+		// todo
+	}
+}
+
+float Source::TellImpl()
+{
+	return m_active ? m_offset : 0;
 }
 
 bool Source::IsStopped() const

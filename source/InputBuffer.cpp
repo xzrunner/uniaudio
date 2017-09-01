@@ -62,6 +62,12 @@ void InputBuffer::DecoderRewind()
 	}
 }
 
+void InputBuffer::Seek(float offset, bool looping)
+{
+	m_decoder->Seek(offset);
+	Reload(looping);
+}
+
 void InputBuffer::Reload(bool looping)
 {
 	m_size = m_decoder->Decode();

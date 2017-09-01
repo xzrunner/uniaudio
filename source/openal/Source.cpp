@@ -341,7 +341,12 @@ void Source::SeekImpl(float offset)
 	if (m_stream) 
 	{
 		m_offset = offset;
-		m_ibuf->GetDecoder()->Seek(offset);
+
+		bool looping = IsLooping();
+		m_ibuf->Seek(offset, looping);
+		if (m_mix) {
+			m_ibuf->Output(m_obuf, looping);
+		}
 
 		bool paused = m_paused;
 		StopImpl();

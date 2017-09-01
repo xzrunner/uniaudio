@@ -37,6 +37,9 @@ public:
 	void Rewind();
 	void Rewind(Source* source);
 
+	void Seek(Source* source, float offset);
+	float Tell(Source* source);
+
 	void ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq);
 
 private:

@@ -21,6 +21,8 @@ public:
 	const Decoder* GetDecoder() const { return m_decoder; }
 	Decoder* GetDecoder() { return m_decoder; }
 
+	void Seek(float offset, bool looping);
+
 private:
 	void Reload(bool looping);
 
