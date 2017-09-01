@@ -64,6 +64,34 @@ ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
 	}
 }
 
+void AudioContext::Stop()
+{
+	if (m_pool) {
+		m_pool->Stop();
+	}
+}
+
+void AudioContext::Pause()
+{
+	if (m_pool) {
+		m_pool->Pause();
+	}
+}
+
+void AudioContext::Resume()
+{
+	if (m_pool) {
+		m_pool->Resume();
+	}
+}
+
+void AudioContext::Rewind()
+{
+	if (m_pool) {
+		m_pool->Rewind();
+	}
+}
+
 #ifdef __ANDROID__
 
 void AudioContext::InitAAssetMgr(JNIEnv* env, jobject assetManager)

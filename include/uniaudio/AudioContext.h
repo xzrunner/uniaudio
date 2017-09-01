@@ -20,6 +20,11 @@ public:
 	virtual Source* CreateSource(Decoder* decoder) = 0;
 	virtual Source* CreateSource(const std::string& filepath, bool stream) = 0;
 
+	virtual void Stop() = 0;
+	virtual void Pause() = 0;
+	virtual void Resume() = 0;
+	virtual void Rewind() = 0;
+	
 }; // AudioContext
 
 }

@@ -33,6 +33,11 @@ public:
 	virtual ua::Source* CreateSource(Decoder* decoder);
 	virtual ua::Source* CreateSource(const std::string& filepath, bool stream);
 
+	virtual void Stop();
+	virtual void Pause();
+	virtual void Resume();
+	virtual void Rewind();
+
 #ifdef __ANDROID__
 	void InitAAssetMgr(JNIEnv* env, jobject assetManager);
 	bool LoadAssetFile(const std::string& filepath, SLDataLocator_AndroidFD* loc_fd);

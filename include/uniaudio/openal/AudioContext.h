@@ -21,6 +21,11 @@ public:
 	virtual ua::Source* CreateSource(Decoder* decoder);
 	virtual ua::Source* CreateSource(const std::string& filepath, bool stream);
 
+	virtual void Stop();
+	virtual void Pause();
+	virtual void Resume();
+	virtual void Rewind();
+
 public:
 	// 10ms length.
 	static const float BUFFER_TIME_LEN;
