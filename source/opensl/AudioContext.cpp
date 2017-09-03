@@ -24,9 +24,21 @@ update_cb(void* arg)
 }
 
 AudioContext::AudioContext()
-	: m_engine_obj(NULL)
+	: m_own_ctx(true)
+	, m_engine_obj(NULL)
 	, m_engine_engine(NULL)
 	, m_output_mix_obj(NULL)
+	, m_output_mix_env_reverb(NULL)
+	, m_pool(NULL)
+{
+	Initialize();
+}
+
+AudioContext::AudioContext(SLObjectItf engine, SLObjectItf output_mix)
+	: m_own_ctx(false)
+	, m_engine_obj(engine)
+	, m_engine_engine(NULL)
+	, m_output_mix_obj(output_mix)
 	, m_output_mix_env_reverb(NULL)
 	, m_pool(NULL)
 {
@@ -126,9 +138,11 @@ void AudioContext::Initialize()
 		SLresult result;
 
 		// create engine
-		result = slCreateEngine(&m_engine_obj, 0, NULL, 0, NULL, NULL);
-		if (SL_RESULT_SUCCESS != result) {
-			throw Exception("Could not create opensl engine.");
+		if (m_own_ctx) {
+			result = slCreateEngine(&m_engine_obj, 0, NULL, 0, NULL, NULL);
+			if (SL_RESULT_SUCCESS != result) {
+				throw Exception("Could not create opensl engine.");
+			}
 		}
 
 		// realize the engine
@@ -144,11 +158,13 @@ void AudioContext::Initialize()
 		}
 
 		// create output mix, with environmental reverb specified as a non-required interface
-		const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
-		const SLboolean req[1] = {SL_BOOLEAN_FALSE};
-		result = (*m_engine_engine)->CreateOutputMix(m_engine_engine, &m_output_mix_obj, 1, ids, req);
-		if (SL_RESULT_SUCCESS != result) {
-			throw Exception("Could not create output mix.");
+		if (m_own_ctx) {
+			const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
+			const SLboolean req[1] = {SL_BOOLEAN_FALSE};
+			result = (*m_engine_engine)->CreateOutputMix(m_engine_engine, &m_output_mix_obj, 1, ids, req);
+			if (SL_RESULT_SUCCESS != result) {
+				throw Exception("Could not create output mix.");
+			}
 		}
 
 		// realize the output mix
@@ -183,11 +199,14 @@ void AudioContext::Initialize()
 
 void AudioContext::Terminate()
 {
-	if (m_engine_obj) {
-		(*m_engine_obj)->Destroy(m_engine_obj);
-	}
-	if (m_output_mix_obj) {
-		(*m_output_mix_obj)->Destroy(m_output_mix_obj);
+	if (m_own_ctx) 
+	{
+		if (m_engine_obj) {
+			(*m_engine_obj)->Destroy(m_engine_obj);
+		}
+		if (m_output_mix_obj) {
+			(*m_output_mix_obj)->Destroy(m_output_mix_obj);
+		}
 	}
 
 	Callback::UnregisterAsyncUpdate(update_cb);

@@ -27,6 +27,7 @@ class AudioContext : public ua::AudioContext
 {
 public:
 	AudioContext();
+	AudioContext(SLObjectItf engine, SLObjectItf output_mix);
 	virtual ~AudioContext();
 
 	virtual ua::Source* CreateSource(const AudioData* data);
@@ -55,6 +56,8 @@ private:
 	void Terminate();
 
 private:
+	bool m_own_ctx;
+
 	// engine interfaces
 	SLObjectItf m_engine_obj;
 	SLEngineItf m_engine_engine;
