@@ -65,7 +65,7 @@ private:
 	std::set<Source*> m_playing;
 
 	// asset
-	static const int NUM_ASSET_PLAYERS = 64;
+	static const int NUM_ASSET_PLAYERS = 16;
 	std::queue<ALuint> m_asset_player_freelist;
 
 	// queue
