@@ -137,18 +137,19 @@ void AudioContext::Initialize()
 	try {
 		SLresult result;
 
-		// create engine
-		if (m_own_ctx) {
+		if (m_own_ctx) 
+		{
+			// create engine			
 			result = slCreateEngine(&m_engine_obj, 0, NULL, 0, NULL, NULL);
 			if (SL_RESULT_SUCCESS != result) {
 				throw Exception("Could not create opensl engine.");
 			}
-		}
 
-		// realize the engine
-		result = (*m_engine_obj)->Realize(m_engine_obj, SL_BOOLEAN_FALSE);
-		if (SL_RESULT_SUCCESS != result) {
-			throw Exception("Could not realize opensl engine.");
+			// realize the engine
+			result = (*m_engine_obj)->Realize(m_engine_obj, SL_BOOLEAN_FALSE);
+			if (SL_RESULT_SUCCESS != result) {
+				throw Exception("Could not realize opensl engine.");
+			}
 		}
 
 		// get the engine interface, which is needed in order to create other objects
@@ -157,20 +158,21 @@ void AudioContext::Initialize()
 			throw Exception("Could not get opensl interface.");
 		}
 
-		// create output mix, with environmental reverb specified as a non-required interface
-		if (m_own_ctx) {
+		if (m_own_ctx) 
+		{
+			// create output mix, with environmental reverb specified as a non-required interface			
 			const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
 			const SLboolean req[1] = {SL_BOOLEAN_FALSE};
 			result = (*m_engine_engine)->CreateOutputMix(m_engine_engine, &m_output_mix_obj, 1, ids, req);
 			if (SL_RESULT_SUCCESS != result) {
 				throw Exception("Could not create output mix.");
 			}
-		}
 
-		// realize the output mix
-		result = (*m_output_mix_obj)->Realize(m_output_mix_obj, SL_BOOLEAN_FALSE);
-		if (SL_RESULT_SUCCESS != result) {
-			throw Exception("Could not realize output mix.");
+			// realize the output mix
+			result = (*m_output_mix_obj)->Realize(m_output_mix_obj, SL_BOOLEAN_FALSE);
+			if (SL_RESULT_SUCCESS != result) {
+				throw Exception("Could not realize output mix.");
+			}
 		}
 
 		// get the environmental reverb interface
