@@ -3,7 +3,6 @@
 
 #include <uniaudio/AudioMixer.h>
 #include <uniaudio/opensl/AudioPlayer.h>
-#include <multitask/Thread.h>
 
 #include <CU_Uncopyable.h>
 
@@ -12,6 +11,7 @@
 
 #include <set>
 #include <queue>
+#include <mutex>
 
 namespace ua
 {
@@ -55,7 +55,7 @@ private:
 	bool InitAssetsAudioPlayer(AssetPlayer* player, const Source* source);
 
 private:
-	mt::Mutex m_mutex;
+	std::mutex m_mutex;
 
 	AudioContext* m_ctx;
 

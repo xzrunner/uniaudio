@@ -2,7 +2,6 @@
 #define _UNIAUDIO_OPENAL_AUDIO_POOL_H_
 
 #include <uniaudio/AudioMixer.h>
-#include <multitask/Thread.h>
 
 #include <CU_Uncopyable.h>
 
@@ -10,6 +9,7 @@
 
 #include <queue>
 #include <set>
+#include <mutex>
 
 namespace ua
 {
@@ -60,7 +60,7 @@ private:
 	}; // QueuePlayer
 
 private:
-	mt::Mutex m_mutex;
+	std::mutex m_mutex;
 
 	std::set<Source*> m_playing;
 

@@ -25,7 +25,7 @@ OutputBuffer::~OutputBuffer()
 
 int OutputBuffer::Input(const unsigned char* buf, int buf_sz)
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	if (m_full) {
 		return 0;
@@ -60,7 +60,7 @@ int OutputBuffer::Input(const unsigned char* buf, int buf_sz)
 
 const unsigned char* OutputBuffer::Output(int& sz)
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	Buffer* buf = m_bufs.front();
 
