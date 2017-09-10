@@ -1,6 +1,8 @@
 #include "uniaudio/OutputBuffer.h"
 #include "uniaudio/Exception.h"
 
+#include <algorithm>
+
 #include <string.h>
 #include <stdlib.h>
 

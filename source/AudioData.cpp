@@ -4,6 +4,7 @@
 #include "uniaudio/Decoder.h"
 
 #include <limits>
+#include <algorithm>
 
 #include <string.h>
 #include <stdlib.h>
