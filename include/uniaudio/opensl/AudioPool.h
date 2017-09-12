@@ -11,7 +11,12 @@
 
 #include <set>
 #include <queue>
+#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
 #include <mutex>
+#include <mingw.mutex.h>
+#else
+#include <mutex>
+#endif
 
 namespace ua
 {
