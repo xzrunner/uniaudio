@@ -208,6 +208,8 @@ float AudioPool::Tell(Source* source)
 
 void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
+
 	assert(bq == m_queue_player.queue);
 
 	m_queue_mixer.Reset();
