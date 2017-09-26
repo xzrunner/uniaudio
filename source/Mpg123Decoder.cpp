@@ -176,7 +176,7 @@ static off_t seek_callback(void* udata, off_t offset, int whence)
 		}
 		else if (offset < 0)
 		{
-			if (fs_ftell(file) >= (size_t) (-offset)) {
+			if (fs_ftell(file) >= (long) (-offset)) {
 				fs_seek_from_cur(file, offset);
 			} else {
 				fs_seek_from_head(file, 0);

@@ -52,9 +52,9 @@ void AudioData::LoadFromFile(const std::string& filepath)
 	{
 		// Expand or allocate buffer. Note that realloc may move
 		// memory to other locations.
-		if (!m_data || buf_size < m_size + decoded)
+		if (!m_data || buf_size < static_cast<size_t>(m_size + decoded))
 		{
-			while (buf_size < m_size + decoded) {
+			while (buf_size < static_cast<size_t>(m_size + decoded)) {
 				buf_size <<= 1;
 			}
 			m_data = static_cast<uint8_t*>(realloc(m_data, buf_size));
@@ -68,7 +68,7 @@ void AudioData::LoadFromFile(const std::string& filepath)
 		memcpy(m_data + m_size, decoder->GetBuffer(), decoded);
 
 		// Overflow check.
-		if (m_size > std::numeric_limits<size_t>::max() - decoded)
+		if (static_cast<unsigned int>(m_size) > std::numeric_limits<size_t>::max() - decoded)
 		{
 			free(m_data);
 			throw Exception("Not enough memory.");
@@ -80,7 +80,7 @@ void AudioData::LoadFromFile(const std::string& filepath)
 		decoded = decoder->Decode();
 	}
 
-	if (m_data && buf_size > m_size) {
+	if (m_data && buf_size > static_cast<size_t>(m_size)) {
 		m_data = static_cast<uint8_t*>(realloc(m_data, m_size));
 	}
 
