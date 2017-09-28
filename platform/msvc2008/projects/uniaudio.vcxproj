@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>0.uniaudio</ProjectName>
+    <ProjectGuid>{FDB8A0EB-D438-43B4-B65F-FF1B80A9D45B}</ProjectGuid>
+    <RootNamespace>uniaudio</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.26730.12</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\uniaudio\x86\Debug\</OutDir>
+    <IntDir>..\uniaudio\x86\Debug\obj\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\uniaudio\x86\Release\</OutDir>
+    <IntDir>..\uniaudio\x86\Release\obj\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\multitask\include;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include;..\..\..\..\editor-external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;__STDC_LIMIT_MACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src\cu;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\multitask\include;..\..\..\..\editor-external\mpg123\include;..\..\..\..\editor-external\c99;..\..\..\..\editor-external\openal32\include;..\..\..\..\editor-external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;__STDC_LIMIT_MACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES.h" />
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_Android.h" />
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_AndroidConfiguration.h" />
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_AndroidMetadata.h" />
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_Platform.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\AudioContext.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\AudioData.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\AudioMixer.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\Callback.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\Decoder.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\DecoderFactory.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\Exception.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\InputBuffer.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\Mpg123Decoder.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\openal\AudioContext.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\openal\AudioPool.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\openal\Source.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioContext.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioPlayer.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioPool.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\Source.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\OutputBuffer.h" />
+    <ClInclude Include="..\..\..\include\uniaudio\Source.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\AudioData.cpp" />
+    <ClCompile Include="..\..\..\source\AudioMixer.cpp" />
+    <ClCompile Include="..\..\..\source\Callback.cpp" />
+    <ClCompile Include="..\..\..\source\Decoder.cpp" />
+    <ClCompile Include="..\..\..\source\DecoderFactory.cpp" />
+    <ClCompile Include="..\..\..\source\Exception.cpp" />
+    <ClCompile Include="..\..\..\source\InputBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\Mpg123Decoder.cpp" />
+    <ClCompile Include="..\..\..\source\openal\AudioContext.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)openal\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)openal\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\openal\AudioPool.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)openal\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)openal\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\openal\Source.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)openal\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)openal\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioContext.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)opensl\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)opensl\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioPlayer.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)opensl\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)opensl\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioPool.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)opensl\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)opensl\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\Source.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)opensl\</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)opensl\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\OutputBuffer.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

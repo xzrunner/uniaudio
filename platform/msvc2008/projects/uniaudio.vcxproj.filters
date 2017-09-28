@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="external">
+      <UniqueIdentifier>{e1ec09cb-b0b3-42a2-8300-1a84e50e1ce8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\sles">
+      <UniqueIdentifier>{00ac46f8-3fc7-44e1-82b8-ebb0b768af71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="context">
+      <UniqueIdentifier>{ed172ef0-99ed-4914-92ad-ae37bac8c6f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="context\openal">
+      <UniqueIdentifier>{4d43ff6c-2b9e-4d38-9b8f-7f15a8de0443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="context\opensl">
+      <UniqueIdentifier>{6baf8a0c-d2e5-41ed-a890-fc23a374b47a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decode">
+      <UniqueIdentifier>{8481be79-5c07-4847-9a4a-02c4404139cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decode\mp3">
+      <UniqueIdentifier>{d73f60e6-b781-4a3e-bfce-8a0dd60bfa9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dataset">
+      <UniqueIdentifier>{837893d1-c4b7-443d-b96d-a80ded78ef0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{03b4298f-2015-417d-a62b-6c93a3044cbf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES.h">
+      <Filter>external\sles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_Android.h">
+      <Filter>external\sles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_AndroidConfiguration.h">
+      <Filter>external\sles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_AndroidMetadata.h">
+      <Filter>external\sles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\external\SLES\OpenSLES_Platform.h">
+      <Filter>external\sles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\AudioContext.h">
+      <Filter>context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\openal\AudioContext.h">
+      <Filter>context\openal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\openal\AudioPool.h">
+      <Filter>context\openal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\openal\Source.h">
+      <Filter>context\openal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioContext.h">
+      <Filter>context\opensl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioPlayer.h">
+      <Filter>context\opensl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\AudioPool.h">
+      <Filter>context\opensl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\opensl\Source.h">
+      <Filter>context\opensl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\Decoder.h">
+      <Filter>decode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\DecoderFactory.h">
+      <Filter>decode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\Mpg123Decoder.h">
+      <Filter>decode\mp3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\AudioData.h">
+      <Filter>dataset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\AudioMixer.h">
+      <Filter>dataset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\InputBuffer.h">
+      <Filter>dataset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\OutputBuffer.h">
+      <Filter>dataset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\Source.h">
+      <Filter>dataset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\Callback.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\uniaudio\Exception.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\openal\AudioContext.cpp">
+      <Filter>context\openal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\openal\AudioPool.cpp">
+      <Filter>context\openal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\openal\Source.cpp">
+      <Filter>context\openal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioContext.cpp">
+      <Filter>context\opensl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioPlayer.cpp">
+      <Filter>context\opensl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\AudioPool.cpp">
+      <Filter>context\opensl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\opensl\Source.cpp">
+      <Filter>context\opensl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Decoder.cpp">
+      <Filter>decode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\DecoderFactory.cpp">
+      <Filter>decode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Mpg123Decoder.cpp">
+      <Filter>decode\mp3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\AudioData.cpp">
+      <Filter>dataset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\AudioMixer.cpp">
+      <Filter>dataset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\InputBuffer.cpp">
+      <Filter>dataset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\OutputBuffer.cpp">
+      <Filter>dataset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Callback.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Exception.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
