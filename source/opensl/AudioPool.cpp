@@ -6,6 +6,8 @@
 #include "uniaudio/OutputBuffer.h"
 #include "uniaudio/Exception.h"
 
+#include <cstdlib>
+
 #include <stddef.h>
 #include <assert.h>
 
@@ -362,7 +364,7 @@ void AudioPool::CreateBufferQueueAudioPlayer()
 void AudioPool::EnqueueAllBuffers()
 {
 	int buf_sz = m_queue_mixer.GetBufSize();
-	void* buf = malloc(buf_sz);
+	void* buf = std::malloc(buf_sz);
 	if (!buf) {
 		throw Exception("Could not malloc buf.");
 	}
@@ -370,11 +372,11 @@ void AudioPool::EnqueueAllBuffers()
 	for (int i = 0; i < NUM_OPENSL_BUFFERS; ++i) {
  		SLresult result = (*m_queue_player.queue)->Enqueue(m_queue_player.queue, buf, buf_sz);
  		if (SL_RESULT_SUCCESS != result) {
-			free(buf);
+			std::free(buf);
 			return;
  		}
 	}
-	free(buf);
+	std::free(buf);
 }
 
 static void asset_player_cb(SLPlayItf caller, void* context, SLuint32 play_event)
