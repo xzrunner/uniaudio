@@ -24,9 +24,9 @@ update_cb(void* arg)
 
 AudioContext::AudioContext()
 	: m_own_ctx(true)
-	, m_device(NULL)
-	, m_context(NULL)
-	, m_pool(NULL)
+	, m_device(nullptr)
+	, m_context(nullptr)
+	, m_pool(nullptr)
 {
 	Initialize();
 }
@@ -35,7 +35,7 @@ AudioContext::AudioContext(ALCdevice* device, ALCcontext* context)
 	: m_own_ctx(false)
 	, m_device(device)
 	, m_context(context)
-	, m_pool(NULL)
+	, m_pool(nullptr)
 {
 	Initialize();
 }
@@ -45,33 +45,33 @@ AudioContext::~AudioContext()
 	Terminate();
 }
 
-ua::Source* AudioContext::CreateSource(const AudioData* data)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const AudioData* data)
 {
 	if (!m_pool) {
-		return NULL;
+		return nullptr;
 	} else {
-		return new Source(m_pool, data);
+		return std::make_shared<Source>(m_pool, data);
 	}
 }
 
-ua::Source* AudioContext::CreateSource(Decoder* decoder)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(std::unique_ptr<Decoder>& decoder)
 {
 	if (!m_pool) {
-		return NULL;
+		return nullptr;
 	} else {
-		return new Source(m_pool, decoder, false);
+		return std::make_shared<Source>(m_pool, decoder, false);
 	}
 }
 
-ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const std::string& filepath, bool stream)
 {
 	if (!m_pool) {
-		return NULL;
+		return nullptr;
 	}
 	if (stream) {
-		return new Source(m_pool, DecoderFactory::Create(filepath));
+		return std::make_shared<Source>(m_pool, DecoderFactory::Create(filepath));
 	} else {
-		return new Source(m_pool, new AudioData(filepath));
+		return std::make_shared<Source>(m_pool, new AudioData(filepath));
 	}
 }
 
@@ -108,12 +108,12 @@ void AudioContext::Initialize()
 	try {
 		if (m_own_ctx)
 		{
-			m_device = alcOpenDevice(NULL);
+			m_device = alcOpenDevice(nullptr);
 			if (!m_device) {
 				throw Exception("Could not open openal device.");
 			}
 
-			m_context = alcCreateContext(m_device, NULL);
+			m_context = alcCreateContext(m_device, nullptr);
 			if (!m_context) {
 				throw Exception("Could not create openal context.");
 			}
@@ -143,7 +143,7 @@ void AudioContext::Terminate()
 		delete m_pool;
 	}
 
-	alcMakeContextCurrent(NULL);
+	alcMakeContextCurrent(nullptr);
 	if (m_own_ctx)
 	{
 		if (m_context) {

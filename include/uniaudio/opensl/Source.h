@@ -5,6 +5,7 @@
 #include "uniaudio/opensl/AudioPlayer.h"
 
 #include <string>
+#include <memory>
 
 namespace ua
 {
@@ -18,11 +19,11 @@ namespace opensl
 {
 
 class AudioPool;
-class Source : public ua::Source
+class Source : public ua::Source, public std::enable_shared_from_this<Source>
 {
 public:
 	Source(AudioPool* pool, const std::string& filepath);
-	Source(AudioPool* pool, Decoder* decoder);
+	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder);
 	virtual ~Source();
 
 	virtual bool Update();

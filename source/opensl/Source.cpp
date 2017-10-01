@@ -20,22 +20,22 @@ Source::Source(AudioPool* pool, const std::string& filepath)
 	, m_paused(false)
 	, m_offset(0)
 	, m_stream(false)
-	, m_ibuf(NULL)
-	, m_obuf(NULL)
+	, m_ibuf(nullptr)
+	, m_obuf(nullptr)
 	, m_filepath(filepath)
-	, m_player(NULL)
+	, m_player(nullptr)
 {
 }
 
-Source::Source(AudioPool* pool, Decoder* decoder)
+Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder)
 	: m_pool(pool)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
 	, m_offset(0)
 	, m_stream(true)
-	, m_ibuf(NULL)
-	, m_player(NULL)
+	, m_ibuf(nullptr)
+	, m_player(nullptr)
 {
 	m_ibuf = new InputBuffer(decoder);
 	if (!m_ibuf) {
@@ -56,7 +56,7 @@ Source::Source(AudioPool* pool, Decoder* decoder)
 Source::~Source()
 {
 	if (m_active) {
-		m_pool->Stop(this);
+		m_pool->Stop(shared_from_this());
 	}
 	if (m_ibuf) {
 		delete m_ibuf;
@@ -88,16 +88,16 @@ void Source::Play()
 	if (m_active) 
 	{
 		if (m_paused) {
-			m_pool->Resume(this);
+			m_pool->Resume(shared_from_this());
 		}
 #ifdef FORCE_REPLAY
 		else {
-			m_pool->Rewind(this);
+			m_pool->Rewind(shared_from_this());
 		}
 #endif // FORCE_REPLAY
 		return;
 	}
-	m_active = m_pool->Play(this);
+	m_active = m_pool->Play(shared_from_this());
 	if (!m_active) {
 		m_offset = 0;
 	}
@@ -106,33 +106,33 @@ void Source::Play()
 void Source::Stop()
 {
 	if (!IsStopped()) {
-		m_pool->Stop(this);
+		m_pool->Stop(shared_from_this());
 	}
 }
 
 void Source::Pause()
 {
-	m_pool->Pause(this);
+	m_pool->Pause(shared_from_this());
 }
 
 void Source::Resume()
 {
-	m_pool->Resume(this);
+	m_pool->Resume(shared_from_this());
 }
 
 void Source::Rewind()
 {
-	m_pool->Rewind(this);
+	m_pool->Rewind(shared_from_this());
 }
 
 void Source::Seek(float offset)
 {
-	m_pool->Seek(this, offset);
+	m_pool->Seek(shared_from_this(), offset);
 }
 
 float Source::Tell()
 {
-	return m_pool->Tell(this);
+	return m_pool->Tell(shared_from_this());
 }
 
 void Source::PlayImpl()

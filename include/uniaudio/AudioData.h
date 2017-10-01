@@ -1,7 +1,7 @@
 #ifndef _UNIAUDIO_AUDIO_DATA_H_
 #define _UNIAUDIO_AUDIO_DATA_H_
 
-#include <CU_Uncopyable.h>
+#include <cu/uncopyable.h>
 
 #include <string>
 #include <vector>

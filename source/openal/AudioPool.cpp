@@ -69,10 +69,10 @@ void AudioPool::Update()
 
 	std::lock_guard<std::mutex> lock(m_mutex);
 	
-	std::set<Source*>::iterator itr = m_playing.begin();
+	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); )
 	{
-		Source* source = *itr;
+		const std::shared_ptr<Source>& source = *itr;
 		if (source->Update()) {
 			++itr;
 			continue;
@@ -80,7 +80,6 @@ void AudioPool::Update()
 
 		source->StopImpl();
 		source->RewindImpl();
-		source->RemoveReference();
 
 		if (!source->IsMix()) {
 			ALuint player = source->GetPlayer();
@@ -93,13 +92,13 @@ void AudioPool::Update()
 	m_queue_player.Update(m_playing);
 }
 
-bool AudioPool::Play(Source* source)
+bool AudioPool::Play(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		return true;
 	}
@@ -115,7 +114,6 @@ bool AudioPool::Play(Source* source)
 	}
 
 	m_playing.insert(source);
-	source->AddReference();
 
 	source->PlayImpl();
 
@@ -127,28 +125,27 @@ void AudioPool::Stop()
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
+	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
-		Source* s = *itr;
+		const std::shared_ptr<Source>& s = *itr;
 		if (!s->IsMix())
 		{
 			ALuint player = s->GetPlayer();
 			m_asset_player_freelist.push(player);
 		}
 		s->StopImpl();
-		s->RemoveReference();
 	}
 	m_playing.clear();
 }
 
-void AudioPool::Stop(Source* source)
+void AudioPool::Stop(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
 	
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end())
 	{
 		if (!source->IsMix())
@@ -158,7 +155,6 @@ void AudioPool::Stop(Source* source)
 		}
 		source->StopImpl();
 		m_playing.erase(itr);
-		source->RemoveReference();
 	}
 }
 
@@ -169,18 +165,17 @@ void AudioPool::Pause()
 	m_active = false;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->PauseImpl();
+	for (auto& source : m_playing) {
+		source->PauseImpl();
 	}
 }
 
-void AudioPool::Pause(Source* source)
+void AudioPool::Pause(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->PauseImpl();
 	}
@@ -193,18 +188,17 @@ void AudioPool::Resume()
 	m_active = true;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->ResumeImpl();
+	for (auto& source : m_playing) {
+		source->ResumeImpl();
 	}
 }
 
-void AudioPool::Resume(Source* source)
+void AudioPool::Resume(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->ResumeImpl();
 	}
@@ -215,13 +209,12 @@ void AudioPool::Rewind()
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->RewindImpl();
+	for (auto& source : m_playing) {
+		source->RewindImpl();
 	}
 }
 
-void AudioPool::Rewind(Source* source)
+void AudioPool::Rewind(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
@@ -229,7 +222,7 @@ void AudioPool::Rewind(Source* source)
 	source->RewindImpl();
 }
 
-void AudioPool::Seek(Source* source, float offset)
+void AudioPool::Seek(const std::shared_ptr<Source>& source, float offset)
 {
 	CheckOpenal check;
 
@@ -237,7 +230,7 @@ void AudioPool::Seek(Source* source, float offset)
 	source->SeekImpl(offset);
 }
 
-float AudioPool::Tell(Source* source)
+float AudioPool::Tell(const std::shared_ptr<Source>& source)
 {
 	CheckOpenal check;
 
@@ -307,7 +300,7 @@ AudioPool::QueuePlayer::
 }
 
 void AudioPool::QueuePlayer::
-Update(const std::set<Source*>& playing)
+Update(const std::set<std::shared_ptr<Source>>& playing)
 {
 	CheckOpenal check;
 
@@ -323,17 +316,17 @@ Update(const std::set<Source*>& playing)
 }
 
 void AudioPool::QueuePlayer::
-Stream(ALuint buffer, const std::set<Source*>& playing)
+Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing)
 {
 	CheckOpenal check;
 
 	m_mixer.Reset();
 
 	ALenum fmt = AL_FORMAT_STEREO16;
-	std::set<Source*>::const_iterator itr = playing.begin();
+	auto itr = playing.begin();
 	for ( ; itr != playing.end(); ++itr)
 	{
-		Source* source = *itr;
+		auto& source = *itr;
 		if (!source->IsMix() || source->IsStopped() || source->IsPaused()) {
 			continue;
 		}
@@ -348,7 +341,7 @@ Stream(ALuint buffer, const std::set<Source*>& playing)
 
 		const InputBuffer* ibuf = source->GetInputBuffer();
 		assert(ibuf);
-		const Decoder* decoder = ibuf->GetDecoder();
+		const std::unique_ptr<Decoder>& decoder = ibuf->GetDecoder();
 		int hz = decoder->GetSampleRate();
 		int depth = decoder->GetBitDepth();
 		int channels = decoder->GetChannels();

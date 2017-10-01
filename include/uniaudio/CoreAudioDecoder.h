@@ -37,7 +37,7 @@ private:
 public:
 	struct Data
 	{
-		Data() : file(NULL), size(0) {}
+		Data() : file(nullptr), size(0) {}
 		~Data() { if (file) fs_close(file); }
 
 		fs_file* file;

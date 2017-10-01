@@ -1,6 +1,8 @@
 #ifndef _UNIAUDIO_INPUT_BUFFER_H_
 #define _UNIAUDIO_INPUT_BUFFER_H_
 
+#include <memory>
+
 namespace ua
 {
 
@@ -10,16 +12,15 @@ class OutputBuffer;
 class InputBuffer
 {
 public:
-	InputBuffer(Decoder* decoder);
-	~InputBuffer();
+	InputBuffer(std::unique_ptr<Decoder>& decoder);
 
 	void Output(OutputBuffer* out, bool looping);
 
 	bool IsDecoderFinished() const;
 	void DecoderRewind();
 
-	const Decoder* GetDecoder() const { return m_decoder; }
-	Decoder* GetDecoder() { return m_decoder; }
+	const std::unique_ptr<Decoder>& GetDecoder() const { return m_decoder; }
+	std::unique_ptr<Decoder>& GetDecoder() { return m_decoder; }
 
 	void Seek(float offset, bool looping);
 
@@ -27,7 +28,7 @@ private:
 	void Reload(bool looping);
 
 private:
-	Decoder* m_decoder;
+	std::unique_ptr<Decoder> m_decoder;
 
 	int m_size, m_used;
 

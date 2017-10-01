@@ -4,6 +4,7 @@
 #include "uniaudio/Decoder.h"
 
 #include <string>
+#include <memory>
 
 namespace ua
 {
@@ -11,7 +12,7 @@ namespace ua
 class DecoderFactory
 {
 public:
-	static Decoder* Create(const std::string& filepath, 
+	static std::unique_ptr<Decoder> Create(const std::string& filepath,
 		int buf_sz = Decoder::DEFAULT_BUFFER_SIZE);
 
 }; // DecoderFactory

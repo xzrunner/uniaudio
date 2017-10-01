@@ -1,13 +1,12 @@
 #ifndef _UNIAUDIO_SOURCE_H_
 #define _UNIAUDIO_SOURCE_H_
 
-#include <CU_Uncopyable.h>
-#include <CU_RefCountObj.h>
+#include <cu/uncopyable.h>
 
 namespace ua
 {
 
-class Source : private cu::Uncopyable, public cu::RefCountObj
+class Source : private cu::Uncopyable
 {
 public:
 	Source() {}

@@ -25,8 +25,8 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	, m_offset(0)
 	, m_stream(false)
 	, m_mix(false)
-	, m_ibuf(NULL)
-	, m_obuf(NULL)
+	, m_ibuf(nullptr)
+	, m_obuf(nullptr)
 	, m_player(0)
 {
 	memset(m_buffers, 0, sizeof(m_buffers));
@@ -56,7 +56,7 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	}
 }
 
-Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
+Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder, bool mix)
 	: m_pool(pool)
 	, m_looping(false)
 	, m_active(false)
@@ -65,8 +65,8 @@ Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 	, m_offset(0)
 	, m_stream(true)
 	, m_mix(mix)
-	, m_ibuf(NULL)
-	, m_obuf(NULL)
+	, m_ibuf(nullptr)
+	, m_obuf(nullptr)
 	, m_player(0)
 {
 	m_ibuf = new InputBuffer(decoder);
@@ -99,7 +99,7 @@ Source::Source(AudioPool* pool, Decoder* decoder, bool mix)
 Source::~Source()
 {
 	if (m_active) {
-		m_pool->Stop(this);
+		m_pool->Stop(shared_from_this());
 	}
 	if (m_stream) {
 		if (!m_mix) {
@@ -164,49 +164,49 @@ void Source::Play()
 	if (m_active) 
 	{
 		if (m_paused) {
-			m_pool->Resume(this);
+			m_pool->Resume(shared_from_this());
 		}
 #ifdef FORCE_REPLAY
 		else {
-			m_pool->Rewind(this);
+			m_pool->Rewind(shared_from_this());
 		}
 #endif // FORCE_REPLAY
 		return;
 	}
 
-	m_active = m_pool->Play(this);
+	m_active = m_pool->Play(shared_from_this());
 }
 
 void Source::Stop()
 {
 	if (!IsStopped()) {
-		m_pool->Stop(this);
+		m_pool->Stop(shared_from_this());
 	}
 }
 
 void Source::Pause()
 {
-	m_pool->Pause(this);
+	m_pool->Pause(shared_from_this());
 }
 
 void Source::Resume()
 {
-	m_pool->Resume(this);
+	m_pool->Resume(shared_from_this());
 }
 
 void Source::Rewind()
 {
-	m_pool->Rewind(this);
+	m_pool->Rewind(shared_from_this());
 }
 
 void Source::Seek(float offset)
 {
-	m_pool->Seek(this, offset);
+	m_pool->Seek(shared_from_this(), offset);
 }
 
 float Source::Tell()
 {
-	return m_pool->Tell(this);
+	return m_pool->Tell(shared_from_this());
 }
 
 void Source::PlayImpl()
@@ -456,7 +456,7 @@ ALenum Source::GetFormat(int channels, int bit_depth)
 int Source::Stream(ALuint buffer)
 {
 	assert(m_ibuf && !m_mix);
-	Decoder* d = m_ibuf->GetDecoder();
+	const std::unique_ptr<Decoder>& d = m_ibuf->GetDecoder();
 	int decoded = std::max(d->Decode(), 0);
 	if (decoded > 0)
 	{

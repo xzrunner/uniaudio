@@ -1,15 +1,14 @@
 #ifndef _UNIAUDIO_DECODER_H_
 #define _UNIAUDIO_DECODER_H_
 
-#include <CU_Uncopyable.h>
-#include <CU_RefCountObj.h>
+#include <cu/uncopyable.h>
 
 #include <stddef.h>
 
 namespace ua
 {
 
-class Decoder : private cu::Uncopyable, public cu::RefCountObj
+class Decoder : private cu::Uncopyable
 {
 public:
 	/**

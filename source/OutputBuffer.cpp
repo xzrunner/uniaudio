@@ -65,7 +65,7 @@ const unsigned char* OutputBuffer::Output(int& sz)
 	Buffer* buf = m_bufs.front();
 
 	sz = buf->size;
-	const unsigned char* ret = sz == 0 ? NULL : buf->buf;
+	const unsigned char* ret = sz == 0 ? nullptr : buf->buf;
 
 	// move to end
 	m_bufs.pop_front();

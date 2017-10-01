@@ -5,6 +5,8 @@
 
 #include <OpenAL/al.h>
 
+#include <memory>
+
 namespace ua
 {
 
@@ -17,11 +19,11 @@ namespace openal
 {
 
 class AudioPool;
-class Source : public ua::Source
+class Source : public ua::Source, public std::enable_shared_from_this<Source>
 {
 public:
 	Source(AudioPool* pool, const AudioData* data);
-	Source(AudioPool* pool, Decoder* decoder, bool mix = false);
+	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder, bool mix = false);
 	virtual ~Source();
 
 	virtual bool Update();

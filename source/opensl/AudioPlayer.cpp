@@ -12,11 +12,11 @@ namespace opensl
 /************************************************************************/
 
 AssetPlayer::AssetPlayer() 
-	: object(NULL) 
-	, play(NULL)
-	, seek(NULL)
-	, mute_solo(NULL)
-	, volume(NULL)
+	: object(nullptr) 
+	, play(nullptr)
+	, seek(nullptr)
+	, mute_solo(nullptr)
+	, volume(nullptr)
 {
 }
 
@@ -32,10 +32,10 @@ void AssetPlayer::Release()
 	if (object) {
 		(*object)->Destroy(object);
 	}
-	play = NULL;
-	seek = NULL;
-	mute_solo = NULL;
-	volume = NULL;
+	play = nullptr;
+	seek = nullptr;
+	mute_solo = nullptr;
+	volume = nullptr;
 }
 
 /************************************************************************/
@@ -43,11 +43,11 @@ void AssetPlayer::Release()
 /************************************************************************/
 
 QueuePlayer::QueuePlayer()
-	: object(NULL)
-	, play(NULL)
-	, queue(NULL)
-//	, effect_send(NULL)
-	, mute_solo(NULL)
+	: object(nullptr)
+	, play(nullptr)
+	, queue(nullptr)
+//	, effect_send(nullptr)
+	, mute_solo(nullptr)
 	, volume(0)
 	, sample_rate(SL_SAMPLINGRATE_44_1)
 {

@@ -1,7 +1,7 @@
 #ifndef _UNIAUDIO_AUDIO_MIXER_H_
 #define _UNIAUDIO_AUDIO_MIXER_H_
 
-#include <CU_Uncopyable.h>
+#include <cu/uncopyable.h>
 
 #include <stdint.h>
 #include <string.h>

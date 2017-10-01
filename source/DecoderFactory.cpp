@@ -11,9 +11,9 @@
 namespace ua
 {
 
-Decoder* DecoderFactory::Create(const std::string& filepath, int buf_sz)
+std::unique_ptr<Decoder> DecoderFactory::Create(const std::string& filepath, int buf_sz)
 {
-	Decoder* decoder = NULL;
+	std::unique_ptr<Decoder> decoder;
 
 	std::string ext = filepath.substr(filepath.find_last_of('.') + 1);
 	std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
@@ -22,11 +22,11 @@ Decoder* DecoderFactory::Create(const std::string& filepath, int buf_sz)
 		;
 #ifndef UA_NO_MPG123
 	else if (Mpg123Decoder::Accepts(ext))
-		decoder = new Mpg123Decoder(filepath, buf_sz);
+		decoder = std::make_unique<Mpg123Decoder>(filepath, buf_sz);
 #endif // UA_NO_MPG123
 #ifdef UA_SUPPORT_COREAUDIO
 	else if (CoreAudioDecoder::Accepts(ext))
-		decoder = new CoreAudioDecoder(filepath, buf_sz);
+		decoder = std::make_unique<CoreAudioDecoder>(filepath, buf_sz);
 #endif // UA_SUPPORT_COREAUDIO
 
 	return decoder;

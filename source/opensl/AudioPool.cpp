@@ -42,10 +42,10 @@ void AudioPool::Update()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::set<Source*>::iterator itr = m_playing.begin();
+	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); )
 	{
-		Source* source = *itr;
+		auto& source = *itr;
 		if (source->IsStopped() || source->IsPaused()) {
 			++itr;
 			continue;
@@ -63,17 +63,16 @@ void AudioPool::Update()
 
 		source->StopImpl();
 		source->RewindImpl();
-		source->RemoveReference();
 
 		m_playing.erase(itr++);
 	}
 }
 
-bool AudioPool::Play(Source* source)
+bool AudioPool::Play(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		return true;
 	}
@@ -95,7 +94,6 @@ bool AudioPool::Play(Source* source)
 	}
 
 	m_playing.insert(source);
-	source->AddReference();
 
 	source->PlayImpl();
 
@@ -106,10 +104,10 @@ void AudioPool::Stop()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::set<Source*>::iterator itr = m_playing.begin();
+	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
-		Source* s = *itr;
+		auto& s = *itr;
 		if (!s->IsStream()) 
 		{
 			AssetPlayer* player = s->GetPlayer();
@@ -118,16 +116,15 @@ void AudioPool::Stop()
 			m_asset_player_freelist.push(player);
 		}
 		s->StopImpl();
-		s->RemoveReference();
 	}
 	m_playing.clear();
 }
 
-void AudioPool::Stop(Source* source)
+void AudioPool::Stop(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr == m_playing.end()) {
 		return;
 	}
@@ -142,22 +139,20 @@ void AudioPool::Stop(Source* source)
 
 	source->StopImpl();
 	m_playing.erase(itr);
-	source->RemoveReference();
 }
 
 void AudioPool::Pause()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->PauseImpl();
+	for (auto& source : m_playing) {
+		source->PauseImpl();
 	}
 }
 
-void AudioPool::Pause(Source* source)
+void AudioPool::Pause(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->PauseImpl();
 	}
@@ -166,16 +161,15 @@ void AudioPool::Pause(Source* source)
 void AudioPool::Resume()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->ResumeImpl();
+	for (auto& source : m_playing) {
+		source->ResumeImpl();
 	}
 }
 
-void AudioPool::Resume(Source* source)
+void AudioPool::Resume(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.find(source);
+	auto itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
 		(*itr)->ResumeImpl();
 	}
@@ -184,25 +178,24 @@ void AudioPool::Resume(Source* source)
 void AudioPool::Rewind()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	std::set<Source*>::iterator itr = m_playing.begin();
-	for ( ; itr != m_playing.end(); ++itr) {
-		(*itr)->RewindImpl();
+	for (auto& source : m_playing) {
+		source->RewindImpl();
 	}
 }
 
-void AudioPool::Rewind(Source* source)
+void AudioPool::Rewind(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	source->RewindImpl();
 }
 
-void AudioPool::Seek(Source* source, float offset)
+void AudioPool::Seek(const std::shared_ptr<Source>& source, float offset)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	source->SeekImpl(offset);
 }
 
-float AudioPool::Tell(Source* source)
+float AudioPool::Tell(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	return source->Tell();
@@ -216,10 +209,10 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 
 	m_queue_mixer.Reset();
 
-	std::set<Source*>::iterator itr = m_playing.begin();
+	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
 	{
-		Source* source = *itr;
+		auto& source = *itr;
 		if (!source->IsStream() || source->IsStopped() || source->IsPaused()) {
 			continue;
 		}
@@ -234,7 +227,7 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 
 		const InputBuffer* ibuf = source->GetInputBuffer();
 		assert(ibuf);
-		const Decoder* decoder = ibuf->GetDecoder();
+		const std::unique_ptr<Decoder>& decoder = ibuf->GetDecoder();
 		int hz = decoder->GetSampleRate();
 		int depth = decoder->GetBitDepth();
 		int channels = decoder->GetChannels();
@@ -290,7 +283,7 @@ void AudioPool::CreateBufferQueueAudioPlayer()
 
     // configure audio sink
     SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, m_ctx->GetOutputMix()};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
+    SLDataSink audioSnk = {&loc_outmix, nullptr};
 
     /*
      * create audio player:
@@ -332,7 +325,7 @@ void AudioPool::CreateBufferQueueAudioPlayer()
 	}
 
 // 	// get the effect send interface
-// 	m_queue_player.effect_send = NULL;
+// 	m_queue_player.effect_send = nullptr;
 // 	if( 0 == m_queue_player.sample_rate) {
 // 		result = (*m_queue_player.object)->GetInterface(m_queue_player.object, SL_IID_EFFECTSEND,
 // 			&m_queue_player.effect_send);
@@ -379,14 +372,15 @@ void AudioPool::EnqueueAllBuffers()
 	std::free(buf);
 }
 
+// todo: life for context
 static void asset_player_cb(SLPlayItf caller, void* context, SLuint32 play_event)
 {
-	Source* source = static_cast<Source*>(context);
-	AudioPool* pool = source->GetPool();
-	pool->Stop(source);
+	std::shared_ptr<Source> ptr(static_cast<Source*>(context));
+	AudioPool* pool = ptr->GetPool();
+	pool->Stop(ptr);
 }
 
-bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const Source* source)
+bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const std::shared_ptr<const Source>& source)
 {
 	bool ret = true;
 
@@ -401,12 +395,12 @@ bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const Source* source)
 		}
 #endif // __ANDROID__
 
-		SLDataFormat_MIME format_mime = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
+		SLDataFormat_MIME format_mime = {SL_DATAFORMAT_MIME, nullptr, SL_CONTAINERTYPE_UNSPECIFIED};
 		SLDataSource audioSrc = {&loc_fd, &format_mime};
 
 		// configure audio sink
 		SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, m_ctx->GetOutputMix()};
-		SLDataSink audioSnk = {&loc_outmix, NULL};
+		SLDataSink audioSnk = {&loc_outmix, nullptr};
 
 		// create audio player
 		const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
@@ -452,7 +446,9 @@ bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const Source* source)
 			throw Exception("Could not enable whole file looping.");
 		}
 
-		(*player->play)->RegisterCallback(player->play, asset_player_cb, const_cast<Source*>(source));
+		// todo: life for source
+		(*player->play)->RegisterCallback(player->play, asset_player_cb, 
+			const_cast<void*>(static_cast<const void*>(source.get())));
 	} catch (Exception&) {
 		ret = false;
 		if (player->object) {

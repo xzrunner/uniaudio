@@ -41,8 +41,8 @@ SInt64 get_size_func(void* in_client_data)
 
 CoreAudioDecoder::CoreAudioDecoder(const std::string& filepath, int buf_sz)
 	: Decoder(buf_sz)
-	, m_audio_file(NULL)
-	, m_ext_audio_file(NULL)
+	, m_audio_file(nullptr)
+	, m_ext_audio_file(nullptr)
 {
 	try 
 	{
@@ -55,7 +55,7 @@ CoreAudioDecoder::CoreAudioDecoder(const std::string& filepath, int buf_sz)
 		OSStatus err = noErr;
 
 		// Open the file represented by the Data.
-		err = AudioFileOpenWithCallbacks(&m_source, read_func, NULL, get_size_func, NULL, kAudioFileMP3Type, &m_audio_file);
+		err = AudioFileOpenWithCallbacks(&m_source, read_func, nullptr, get_size_func, nullptr, kAudioFileMP3Type, &m_audio_file);
 		if (err != noErr) {
 			throw Exception("Could not open audio file for decoding.");
 		}
@@ -185,7 +185,7 @@ bool CoreAudioDecoder::Accepts(const std::string& ext)
 	std::vector<UInt32> types;
 
 	// Get the size in bytes of the type array we're about to get.
-	OSStatus err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_ReadableTypes, sizeof(UInt32), NULL, &size);
+	OSStatus err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_ReadableTypes, sizeof(UInt32), nullptr, &size);
 	if (err != noErr) {
 		return false;
 	}
@@ -193,15 +193,15 @@ bool CoreAudioDecoder::Accepts(const std::string& ext)
 	types.resize(size / sizeof(UInt32));
 
 	// Get an array of supported types.
-	err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_ReadableTypes, 0, NULL, &size, &types[0]);
+	err = AudioFileGetGlobalInfo(kAudioFileGlobalInfo_ReadableTypes, 0, nullptr, &size, &types[0]);
 	if (err != noErr) {
 		return false;
 	}
 
 	// Turn the extension string into a CFStringRef.
-	CFStringRef extstr = CFStringCreateWithCString(NULL, ext.c_str(), kCFStringEncodingUTF8);
+	CFStringRef extstr = CFStringCreateWithCString(nullptr, ext.c_str(), kCFStringEncodingUTF8);
 
-	CFArrayRef exts = NULL;
+	CFArrayRef exts = nullptr;
 	size = sizeof(CFArrayRef);
 
 	for (int i = 0, n = types.size(); i < n; ++i)
@@ -237,11 +237,11 @@ void CoreAudioDecoder::CloseAudioFile()
 {
 	if (m_ext_audio_file) {
 		ExtAudioFileDispose(m_ext_audio_file);
-		m_ext_audio_file = NULL;
+		m_ext_audio_file = nullptr;
 	}
 	if (m_audio_file) {
 		AudioFileClose(m_audio_file);
-		m_audio_file = NULL;
+		m_audio_file = nullptr;
 	}
 }
 

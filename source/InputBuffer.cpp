@@ -7,21 +7,11 @@
 namespace ua
 {
 
-InputBuffer::InputBuffer(Decoder* decoder)
-	: m_decoder(decoder)
+InputBuffer::InputBuffer(std::unique_ptr<Decoder>& decoder)
+	: m_decoder(std::move(decoder))
 	, m_size(0)
 	, m_used(0)
 {
-	if (m_decoder) {
-		m_decoder->AddReference();
-	}
-}
-
-InputBuffer::~InputBuffer()
-{
-	if (m_decoder) {
-		m_decoder->RemoveReference();
-	}
 }
 
 void InputBuffer::Output(OutputBuffer* out, bool looping)

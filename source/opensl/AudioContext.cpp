@@ -25,11 +25,11 @@ update_cb(void* arg)
 
 AudioContext::AudioContext()
 	: m_own_ctx(true)
-	, m_engine_obj(NULL)
-	, m_engine_engine(NULL)
-	, m_output_mix_obj(NULL)
-	, m_output_mix_env_reverb(NULL)
-	, m_pool(NULL)
+	, m_engine_obj(nullptr)
+	, m_engine_engine(nullptr)
+	, m_output_mix_obj(nullptr)
+	, m_output_mix_env_reverb(nullptr)
+	, m_pool(nullptr)
 {
 	Initialize();
 }
@@ -37,10 +37,10 @@ AudioContext::AudioContext()
 AudioContext::AudioContext(SLObjectItf engine, SLObjectItf output_mix)
 	: m_own_ctx(false)
 	, m_engine_obj(engine)
-	, m_engine_engine(NULL)
+	, m_engine_engine(nullptr)
 	, m_output_mix_obj(output_mix)
-	, m_output_mix_env_reverb(NULL)
-	, m_pool(NULL)
+	, m_output_mix_env_reverb(nullptr)
+	, m_pool(nullptr)
 {
 	Initialize();
 }
@@ -50,29 +50,29 @@ AudioContext::~AudioContext()
 	Terminate();
 }
 
-ua::Source* AudioContext::CreateSource(const AudioData* data)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const AudioData* data)
 {
-	return NULL;
+	return nullptr;
 }
 
-ua::Source* AudioContext::CreateSource(Decoder* decoder)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(std::unique_ptr<Decoder>& decoder)
 {
 	if (!m_pool) {
-		return NULL;
+		return nullptr;
 	} else {
-		return new Source(m_pool, decoder);
+		return std::make_shared<Source>(m_pool, decoder);
 	}
 }
 
-ua::Source* AudioContext::CreateSource(const std::string& filepath, bool stream)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const std::string& filepath, bool stream)
 {
 	if (!m_pool) {
-		return NULL;
+		return nullptr;
 	}
 	if (stream) {
-		return new Source(m_pool, DecoderFactory::Create(filepath));
+		return std::make_shared<Source>(m_pool, DecoderFactory::Create(filepath));
 	} else {
-		return new Source(m_pool, filepath);
+		return std::make_shared<Source>(m_pool, filepath);
 	}
 }
 
@@ -140,7 +140,7 @@ void AudioContext::Initialize()
 		if (m_own_ctx) 
 		{
 			// create engine			
-			result = slCreateEngine(&m_engine_obj, 0, NULL, 0, NULL, NULL);
+			result = slCreateEngine(&m_engine_obj, 0, nullptr, 0, nullptr, nullptr);
 			if (SL_RESULT_SUCCESS != result) {
 				throw Exception("Could not create opensl engine.");
 			}

@@ -19,8 +19,8 @@ bool Mpg123Decoder::m_inited = false;
 
 Mpg123Decoder::Mpg123Decoder(const std::string& filepath, int buf_sz)
 	: Decoder(buf_sz)
-	, m_file(NULL)
-	, m_handle(NULL)
+	, m_file(nullptr)
+	, m_handle(nullptr)
 	, m_channels(MPG123_STEREO)
 {
 	m_file = fs_open(filepath.c_str(), "rb");
@@ -197,7 +197,7 @@ static void cleanup_callback(void *)
 
 void Mpg123Decoder::InitHandle()
 {
-	m_handle = mpg123_new(NULL, NULL);
+	m_handle = mpg123_new(nullptr, nullptr);
 	if (!m_handle) {
 		return;
 	}
@@ -208,22 +208,22 @@ void Mpg123Decoder::InitHandle()
 	int ret = mpg123_replace_reader_handle(m_handle, &read_callback, &seek_callback, &cleanup_callback);
 	if (ret != MPG123_OK) {
 		mpg123_delete(m_handle);
-		m_handle = NULL;
+		m_handle = nullptr;
 		return;
 	}
 
 	ret = mpg123_open_handle(m_handle, m_file);
 	if (ret != MPG123_OK) {
 		mpg123_delete(m_handle);
-		m_handle = NULL;
+		m_handle = nullptr;
 		return;
 	}
 
 	long rate = 0;
-	ret = mpg123_getformat(m_handle, &rate, &m_channels, NULL);
+	ret = mpg123_getformat(m_handle, &rate, &m_channels, nullptr);
 	if (ret == MPG123_ERR) {
 		mpg123_delete(m_handle);
-		m_handle = NULL;
+		m_handle = nullptr;
 		return;
 	}
 

@@ -3,7 +3,7 @@
 
 #include <uniaudio/AudioMixer.h>
 
-#include <CU_Uncopyable.h>
+#include <cu/uncopyable.h>
 
 #include <OpenAL/al.h>
 
@@ -31,18 +31,18 @@ public:
 
 	void Update();
 
-	bool Play(Source* source);
+	bool Play(const std::shared_ptr<Source>& source);
 	void Stop();
-	void Stop(Source* source);
+	void Stop(const std::shared_ptr<Source>& source);
 	void Pause();
-	void Pause(Source* source);
+	void Pause(const std::shared_ptr<Source>& source);
 	void Resume();
-	void Resume(Source* source);
+	void Resume(const std::shared_ptr<Source>& source);
 	void Rewind();
-	void Rewind(Source* source);
+	void Rewind(const std::shared_ptr<Source>& source);
 
-	void Seek(Source* source, float offset);
-	float Tell(Source* source);
+	void Seek(const std::shared_ptr<Source>& source, float offset);
+	float Tell(const std::shared_ptr<Source>& source);
 
 private:
 	class QueuePlayer
@@ -51,10 +51,10 @@ private:
 		QueuePlayer();
 		~QueuePlayer();
 
-		void Update(const std::set<Source*>& playing);
+		void Update(const std::set<std::shared_ptr<Source>>& playing);
 
 	private:
-		void Stream(ALuint buffer, const std::set<Source*>& playing);
+		void Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing);
 
 	private:
 		ALuint     m_source;
@@ -68,7 +68,7 @@ private:
 private:
 	std::mutex m_mutex;
 
-	std::set<Source*> m_playing;
+	std::set<std::shared_ptr<Source>> m_playing;
 
 	// asset
 	static const int NUM_ASSET_PLAYERS = 16;

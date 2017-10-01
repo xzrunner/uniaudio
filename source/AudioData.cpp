@@ -13,7 +13,7 @@ namespace ua
 {
 
 AudioData::AudioData(const std::string& filepath)
-	: m_data(NULL)
+	: m_data(nullptr)
 	, m_size(0)
 	, m_sample_rate(Decoder::DEFAULT_SAMPLE_RATE)
 	, m_channels(0)
@@ -23,7 +23,7 @@ AudioData::AudioData(const std::string& filepath)
 }
 
 AudioData::AudioData(const std::vector<ua::AudioData*>& list)
-	: m_data(NULL)
+	: m_data(nullptr)
 	, m_size(0)
 	, m_sample_rate(Decoder::DEFAULT_SAMPLE_RATE)
 	, m_channels(0)
@@ -41,7 +41,7 @@ AudioData::~AudioData()
 
 void AudioData::LoadFromFile(const std::string& filepath)
 {
-	Decoder* decoder = DecoderFactory::Create(filepath);
+	std::unique_ptr<Decoder> decoder = DecoderFactory::Create(filepath);
 	if (!decoder) {
 		return;
 	}
@@ -87,8 +87,6 @@ void AudioData::LoadFromFile(const std::string& filepath)
 	m_sample_rate = decoder->GetSampleRate();
 	m_channels = decoder->GetChannels();
 	m_bit_depth = decoder->GetBitDepth();
-
-	decoder->RemoveReference();
 }
 
 void AudioData::LoadFromList(const std::vector<ua::AudioData*>& list)

@@ -5,7 +5,7 @@ namespace ua
 {
 
 Decoder::Decoder(int buf_sz) 
-	: m_buf(NULL)
+	: m_buf(nullptr)
 	, m_buf_size(buf_sz)
 	, m_offset(0)
 	, m_eof(false)
