@@ -13,6 +13,22 @@ namespace ua
 namespace openal
 {
 
+class CheckOpenal
+{
+public:
+    ~CheckOpenal() {
+        EatError();
+    }
+        
+private:
+    void EatError() {
+        while (alGetError() != AL_NO_ERROR) {
+            ;
+        }
+    }
+        
+}; // CheckOpenal
+
 AudioPool::AudioPool()
 	: m_active(true)
 {
@@ -45,6 +61,8 @@ AudioPool::~AudioPool()
 
 void AudioPool::Update()
 {
+	CheckOpenal check;
+
 	if (!m_active) {
 		return;
 	}
@@ -77,6 +95,8 @@ void AudioPool::Update()
 
 bool AudioPool::Play(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 
 	std::set<Source*>::iterator itr = m_playing.find(source);
@@ -104,6 +124,8 @@ bool AudioPool::Play(Source* source)
 
 void AudioPool::Stop()
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr)
@@ -122,6 +144,8 @@ void AudioPool::Stop()
 
 void AudioPool::Stop(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	
 	std::set<Source*>::iterator itr = m_playing.find(source);
@@ -140,6 +164,8 @@ void AudioPool::Stop(Source* source)
 
 void AudioPool::Pause()
 {
+	CheckOpenal check;
+
 	m_active = false;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -151,6 +177,8 @@ void AudioPool::Pause()
 
 void AudioPool::Pause(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
@@ -160,6 +188,8 @@ void AudioPool::Pause(Source* source)
 
 void AudioPool::Resume()
 {
+	CheckOpenal check;
+
 	m_active = true;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -171,6 +201,8 @@ void AudioPool::Resume()
 
 void AudioPool::Resume(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.find(source);
 	if (itr != m_playing.end()) {
@@ -180,6 +212,8 @@ void AudioPool::Resume(Source* source)
 
 void AudioPool::Rewind()
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
@@ -189,18 +223,24 @@ void AudioPool::Rewind()
 
 void AudioPool::Rewind(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	source->RewindImpl();
 }
 
 void AudioPool::Seek(Source* source, float offset)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	source->SeekImpl(offset);
 }
 
 float AudioPool::Tell(Source* source)
 {
+	CheckOpenal check;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	return source->Tell();
 }
@@ -269,6 +309,8 @@ AudioPool::QueuePlayer::
 void AudioPool::QueuePlayer::
 Update(const std::set<Source*>& playing)
 {
+	CheckOpenal check;
+
 	ALint processed = 0;
 	alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &processed);
 	while (processed--)
@@ -283,6 +325,8 @@ Update(const std::set<Source*>& playing)
 void AudioPool::QueuePlayer::
 Stream(ALuint buffer, const std::set<Source*>& playing)
 {
+	CheckOpenal check;
+
 	m_mixer.Reset();
 
 	ALenum fmt = AL_FORMAT_STEREO16;
