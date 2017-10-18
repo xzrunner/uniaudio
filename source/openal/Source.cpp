@@ -123,10 +123,6 @@ bool Source::Update()
 		return false;
 	}
 
-	if (!alcGetCurrentContext()) {
-		return false;
-	}
-
 	if (!m_stream) {
 		assert(!m_mix);
 		alSourcei(m_player, AL_LOOPING, IsLooping() ? AL_TRUE : AL_FALSE);
@@ -215,10 +211,6 @@ float Source::Tell()
 
 void Source::PlayImpl()
 {
-	if (!alcGetCurrentContext()) {
-		return;
-	}
-
 	if (m_stream)
 	{
 		if (!m_mix)
@@ -266,10 +258,6 @@ void Source::StopImpl()
 		return;
 	}
 
-	if (!alcGetCurrentContext()) {
-		return;
-	}
-
 	if (m_stream)
 	{
 		if (!m_mix)
@@ -298,8 +286,7 @@ void Source::StopImpl()
 
 void Source::PauseImpl()
 {
- 	if (m_active && alcGetCurrentContext()) 
-	{
+ 	if (m_active) {
 		if (!m_mix) {
 			alSourcePause(m_player);
 		}
@@ -309,7 +296,7 @@ void Source::PauseImpl()
 
 void Source::ResumeImpl()
 {
- 	if (m_active && m_paused && alcGetCurrentContext()) {
+ 	if (m_active && m_paused) {
 		if (!m_mix) {
  			alSourcePlay(m_player);
 		}
@@ -319,10 +306,6 @@ void Source::ResumeImpl()
 
 void Source::RewindImpl()
 {
-	if (!alcGetCurrentContext()) {
-		return;
-	}
-
 	if (m_active)
 	{
 		if (m_stream)
@@ -361,10 +344,6 @@ void Source::SeekImpl(float offset)
 		return;
 	}
 
-	if (!alcGetCurrentContext()) {
-		return;
-	}
-
 	if (m_stream) 
 	{
 		m_offset = offset;
@@ -394,10 +373,6 @@ float Source::TellImpl()
 		return 0;
 	}
 
-	if (!alcGetCurrentContext()) {
-		return 0;
-	}
-
 	float offset;
 	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset);
 	offset /= m_freq;
@@ -409,10 +384,6 @@ float Source::TellImpl()
 
 void Source::SetLooping(bool looping)
 {
-	if (!alcGetCurrentContext()) {
-		return;
-	}
-
 	if (m_active && !m_stream) {
 		assert(!m_mix);
 		alSourcei(m_player, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
@@ -433,10 +404,6 @@ bool Source::IsStopped() const
 		return false;
 	}
 
-	if (!alcGetCurrentContext()) {
-		return false;
-	}
-
 	if (m_active) {
 		ALenum state;
 		alGetSourcei(m_player, AL_SOURCE_STATE, &state);
@@ -450,10 +417,6 @@ bool Source::IsPaused() const
 {
 	// todo
 	if (m_mix) {
-		return false;
-	}
-
-	if (!alcGetCurrentContext()) {
 		return false;
 	}
 
@@ -527,10 +490,6 @@ int Source::Stream(ALuint buffer)
 
 float Source::GetCurrOffset(int freq)
 {
-	if (!alcGetCurrentContext()) {
-		return 0;
-	}
-
 	assert(freq != 0);
 	float offset_samples;
 	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset_samples);
