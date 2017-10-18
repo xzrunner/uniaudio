@@ -14,6 +14,7 @@ namespace openal
 {
 
 AudioPool::AudioPool()
+	: m_active(true)
 {
 	ALuint sources[NUM_ASSET_PLAYERS];
 	alGenSources(NUM_ASSET_PLAYERS, sources);	
@@ -44,6 +45,10 @@ AudioPool::~AudioPool()
 
 void AudioPool::Update()
 {
+	if (!m_active) {
+		return;
+	}
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	
 	std::set<Source*>::iterator itr = m_playing.begin();
@@ -135,6 +140,8 @@ void AudioPool::Stop(Source* source)
 
 void AudioPool::Pause()
 {
+	m_active = false;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
@@ -153,6 +160,8 @@ void AudioPool::Pause(Source* source)
 
 void AudioPool::Resume()
 {
+	m_active = true;
+
 	std::lock_guard<std::mutex> lock(m_mutex);
 	std::set<Source*>::iterator itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); ++itr) {
