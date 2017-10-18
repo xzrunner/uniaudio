@@ -15,6 +15,7 @@
 #else
 #include <mutex>
 #endif
+#include <atomic>
 
 namespace ua
 {
@@ -75,6 +76,8 @@ private:
 
 	// queue
 	QueuePlayer m_queue_player;
+
+	std::atomic<bool> m_active;
 
 }; // AudioPool
 
