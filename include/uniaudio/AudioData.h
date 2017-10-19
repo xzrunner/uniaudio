@@ -2,9 +2,7 @@
 #define _UNIAUDIO_AUDIO_DATA_H_
 
 #include <cu/uncopyable.h>
-
-#include <string>
-#include <vector>
+#include <cu/cu_stl.h>
 
 #include <stdint.h>
 
@@ -16,8 +14,8 @@ class Decoder;
 class AudioData : private cu::Uncopyable
 {
 public:
-	AudioData(const std::string& filepath);
-	AudioData(const std::vector<ua::AudioData*>& list);
+	AudioData(const CU_STR& filepath);
+	AudioData(const CU_VEC<ua::AudioData*>& list);
 	~AudioData();
 
 	const uint8_t* GetData() const { return m_data; }
@@ -28,9 +26,9 @@ public:
 	int GetBitDepth() const { return m_bit_depth; }
 
 private:
-	void LoadFromFile(const std::string& filepath);
+	void LoadFromFile(const CU_STR& filepath);
 
-	void LoadFromList(const std::vector<ua::AudioData*>& list);
+	void LoadFromList(const CU_VEC<ua::AudioData*>& list);
 
 private:
 	uint8_t* m_data;

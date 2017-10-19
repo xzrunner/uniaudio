@@ -17,7 +17,7 @@ namespace ua
 
 bool Mpg123Decoder::m_inited = false;
 
-Mpg123Decoder::Mpg123Decoder(const std::string& filepath, int buf_sz)
+Mpg123Decoder::Mpg123Decoder(const CU_STR& filepath, int buf_sz)
 	: Decoder(buf_sz)
 	, m_file(nullptr)
 	, m_handle(nullptr)
@@ -102,7 +102,7 @@ int Mpg123Decoder::GetBitDepth() const
 	return 16;
 }
 
-bool Mpg123Decoder::Accepts(const std::string& ext)
+bool Mpg123Decoder::Accepts(const CU_STR& ext)
 {
 	return ext == "mp3";
 }

@@ -63,7 +63,7 @@ std::shared_ptr<ua::Source> AudioContext::CreateSource(std::unique_ptr<Decoder>&
 	}
 }
 
-std::shared_ptr<ua::Source> AudioContext::CreateSource(const std::string& filepath, bool stream)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const CU_STR& filepath, bool stream)
 {
 	if (!m_pool) {
 		return nullptr;

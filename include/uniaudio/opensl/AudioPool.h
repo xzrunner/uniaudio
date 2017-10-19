@@ -5,11 +5,11 @@
 #include <uniaudio/opensl/AudioPlayer.h>
 
 #include <cu/uncopyable.h>
+#include <cu/cu_stl.h>
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
-#include <set>
 #include <queue>
 #if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
 #include <mutex>
@@ -64,7 +64,7 @@ private:
 
 	AudioContext* m_ctx;
 
-	std::set<std::shared_ptr<Source>> m_playing;
+	CU_SET<std::shared_ptr<Source>> m_playing;
 
 	// asset
 	static const int NUM_ASSET_PLAYERS = 16;

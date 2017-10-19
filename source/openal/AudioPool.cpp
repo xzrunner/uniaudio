@@ -306,7 +306,7 @@ AudioPool::QueuePlayer::
 }
 
 void AudioPool::QueuePlayer::
-Update(const std::set<std::shared_ptr<Source>>& playing)
+Update(const CU_SET<std::shared_ptr<Source>>& playing)
 {
 	CheckOpenal check;
 
@@ -322,7 +322,7 @@ Update(const std::set<std::shared_ptr<Source>>& playing)
 }
 
 void AudioPool::QueuePlayer::
-Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing)
+Stream(ALuint buffer, const CU_SET<std::shared_ptr<Source>>& playing)
 {
 	CheckOpenal check;
 

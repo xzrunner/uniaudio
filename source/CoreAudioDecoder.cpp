@@ -1,9 +1,9 @@
 #ifdef UA_SUPPORT_COREAUDIO
 
+#include <cu/cu_stl.h>
+
 #include "uniaudio/CoreAudioDecoder.h"
 #include "uniaudio/Exception.h"
-
-#include <vector>
 
 namespace ua
 {
@@ -39,7 +39,7 @@ SInt64 get_size_func(void* in_client_data)
 }
 } // callbacks
 
-CoreAudioDecoder::CoreAudioDecoder(const std::string& filepath, int buf_sz)
+CoreAudioDecoder::CoreAudioDecoder(const CU_STR& filepath, int buf_sz)
 	: Decoder(buf_sz)
 	, m_audio_file(nullptr)
 	, m_ext_audio_file(nullptr)
@@ -179,10 +179,10 @@ int CoreAudioDecoder::GetBitDepth() const
 	return m_output_info.mBitsPerChannel;
 }
 
-bool CoreAudioDecoder::Accepts(const std::string& ext)
+bool CoreAudioDecoder::Accepts(const CU_STR& ext)
 {
 	UInt32 size = 0;
-	std::vector<UInt32> types;
+	CU_VEC<UInt32> types;
 
 	// Get the size in bytes of the type array we're about to get.
 	OSStatus err = AudioFileGetGlobalInfoSize(kAudioFileGlobalInfo_ReadableTypes, sizeof(UInt32), nullptr, &size);

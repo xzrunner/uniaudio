@@ -13,7 +13,7 @@ namespace ua
 namespace opensl
 {
 
-Source::Source(AudioPool* pool, const std::string& filepath)
+Source::Source(AudioPool* pool, const CU_STR& filepath)
 	: m_pool(pool)
 	, m_looping(false)
 	, m_active(false)

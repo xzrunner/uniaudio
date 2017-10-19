@@ -8,7 +8,7 @@
 namespace ua
 {
 
-Exception::Exception(const std::string& msg)
+Exception::Exception(const CU_STR& msg)
 	: m_message(msg)
 {
 }
@@ -43,7 +43,7 @@ Exception::Exception(const char* fmt, ...)
 
 		delete[] buffer;
 	}
-	m_message = std::string(buffer);
+	m_message = CU_STR(buffer);
 	delete[] buffer;
 }
 

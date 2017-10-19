@@ -1,8 +1,7 @@
 #ifndef _UNIAUDIO_AUDIO_CONTEXT_H_
 #define _UNIAUDIO_AUDIO_CONTEXT_H_
 
-#include <string>
-#include <memory>
+#include <cu/cu_stl.h>
 
 namespace ua
 {
@@ -19,7 +18,7 @@ public:
 
 	virtual std::shared_ptr<ua::Source> CreateSource(const AudioData* data) = 0;
 	virtual std::shared_ptr<ua::Source> CreateSource(std::unique_ptr<Decoder>& decoder) = 0;
-	virtual std::shared_ptr<ua::Source> CreateSource(const std::string& filepath, bool stream) = 0;
+	virtual std::shared_ptr<ua::Source> CreateSource(const CU_STR& filepath, bool stream) = 0;
 
 	virtual void Stop() = 0;
 	virtual void Pause() = 0;

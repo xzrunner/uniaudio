@@ -1,6 +1,8 @@
 #ifndef _UNIAUDIO_OPENSL_AUDIO_CONTEXT_H_
 #define _UNIAUDIO_OPENSL_AUDIO_CONTEXT_H_
 
+#include <cu/cu_stl.h>
+
 #include "uniaudio/AudioContext.h"
 
 #include <SLES/OpenSLES.h>
@@ -11,7 +13,6 @@
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-#include <string>
 #endif // __ANDROID__
 
 namespace ua
@@ -32,7 +33,7 @@ public:
 
 	virtual std::shared_ptr<ua::Source> CreateSource(const AudioData* data);
 	virtual std::shared_ptr<ua::Source> CreateSource(std::unique_ptr<Decoder>& decoder);
-	virtual std::shared_ptr<ua::Source> CreateSource(const std::string& filepath, bool stream);
+	virtual std::shared_ptr<ua::Source> CreateSource(const CU_STR& filepath, bool stream);
 
 	virtual void Stop();
 	virtual void Pause();
@@ -41,7 +42,7 @@ public:
 
 #ifdef __ANDROID__
 	void InitAAssetMgr(JNIEnv* env, jobject assetManager);
-	bool LoadAssetFile(const std::string& filepath, SLDataLocator_AndroidFD* loc_fd);
+	bool LoadAssetFile(const CU_STR& filepath, SLDataLocator_AndroidFD* loc_fd);
 #endif // __ANDROID__
 
 	SLEngineItf GetEngine() { return m_engine_engine; }

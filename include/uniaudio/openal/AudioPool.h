@@ -2,13 +2,12 @@
 #define _UNIAUDIO_OPENAL_AUDIO_POOL_H_
 
 #include <uniaudio/AudioMixer.h>
-
 #include <cu/uncopyable.h>
+#include <cu/cu_stl.h>
 
 #include <OpenAL/al.h>
 
 #include <queue>
-#include <set>
 #if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
 #include <mutex>
 #include <mingw.mutex.h>
@@ -51,10 +50,10 @@ private:
 		QueuePlayer();
 		~QueuePlayer();
 
-		void Update(const std::set<std::shared_ptr<Source>>& playing);
+		void Update(const CU_SET<std::shared_ptr<Source>>& playing);
 
 	private:
-		void Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing);
+		void Stream(ALuint buffer, const CU_SET<std::shared_ptr<Source>>& playing);
 
 	private:
 		ALuint     m_source;
@@ -68,7 +67,7 @@ private:
 private:
 	std::mutex m_mutex;
 
-	std::set<std::shared_ptr<Source>> m_playing;
+	CU_SET<std::shared_ptr<Source>> m_playing;
 
 	// asset
 	static const int NUM_ASSET_PLAYERS = 16;

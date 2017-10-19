@@ -22,7 +22,7 @@ public:
 
 	virtual std::shared_ptr<ua::Source> CreateSource(const AudioData* data);
 	virtual std::shared_ptr<ua::Source> CreateSource(std::unique_ptr<Decoder>& decoder);
-	virtual std::shared_ptr<ua::Source> CreateSource(const std::string& filepath, bool stream);
+	virtual std::shared_ptr<ua::Source> CreateSource(const CU_STR& filepath, bool stream);
 
 	virtual void Stop();
 	virtual void Pause();

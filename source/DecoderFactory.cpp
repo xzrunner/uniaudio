@@ -11,11 +11,11 @@
 namespace ua
 {
 
-std::unique_ptr<Decoder> DecoderFactory::Create(const std::string& filepath, int buf_sz)
+std::unique_ptr<Decoder> DecoderFactory::Create(const CU_STR& filepath, int buf_sz)
 {
 	std::unique_ptr<Decoder> decoder;
 
-	std::string ext = filepath.substr(filepath.find_last_of('.') + 1);
+	CU_STR ext = filepath.substr(filepath.find_last_of('.') + 1);
 	std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 
 	if (false)

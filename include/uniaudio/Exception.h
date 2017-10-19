@@ -1,8 +1,9 @@
 #ifndef _UNIAUDIO_EXCEPTION_H_
 #define _UNIAUDIO_EXCEPTION_H_
 
+#include <cu/cu_stl.h>
+
 #include <exception>
-#include <string>
 
 namespace ua
 {
@@ -10,7 +11,7 @@ namespace ua
 class Exception : public std::exception
 {
 public:
-	Exception(const std::string& msg);
+	Exception(const CU_STR& msg);
 	Exception(const char* fmt, ...);
 	virtual ~Exception() throw() {}
 
@@ -19,7 +20,7 @@ public:
 	}
 
 private:
-	std::string m_message;
+	CU_STR m_message;
 
 }; // Exception 
 

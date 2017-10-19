@@ -3,6 +3,8 @@
 #ifndef _UNIAUDIO_CORE_AUDIO_DECODER_H_
 #define _UNIAUDIO_CORE_AUDIO_DECODER_H_
 
+#include <cu/cu_stl.h>
+
 #include "uniaudio/Decoder.h"
 
 #include <AudioToolbox/AudioFormat.h>
@@ -10,15 +12,13 @@
 
 #include <fs_file.h>
 
-#include <string>
-
 namespace ua
 {
 
 class CoreAudioDecoder : public Decoder
 {
 public:	
-	CoreAudioDecoder(const std::string& filepath, int buf_sz);
+	CoreAudioDecoder(const CU_STR& filepath, int buf_sz);
 	virtual ~CoreAudioDecoder();
 
 	virtual int Decode();
@@ -29,7 +29,7 @@ public:
 	virtual int GetChannels() const;
 	virtual int GetBitDepth() const;
 
-	static bool Accepts(const std::string& ext);
+	static bool Accepts(const CU_STR& ext);
 
 private:
 	void CloseAudioFile();

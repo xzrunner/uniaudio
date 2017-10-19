@@ -1,10 +1,11 @@
 #ifndef _UNIAUDIO_OPENSL_SOURCE_H_
 #define _UNIAUDIO_OPENSL_SOURCE_H_
 
+#include <cu/cu_stl.h>
+
 #include "uniaudio/Source.h"
 #include "uniaudio/opensl/AudioPlayer.h"
 
-#include <string>
 #include <memory>
 
 namespace ua
@@ -22,7 +23,7 @@ class AudioPool;
 class Source : public ua::Source, public std::enable_shared_from_this<Source>
 {
 public:
-	Source(AudioPool* pool, const std::string& filepath);
+	Source(AudioPool* pool, const CU_STR& filepath);
 	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder);
 	virtual ~Source();
 
@@ -52,7 +53,7 @@ public:
 	const InputBuffer* GetInputBuffer() const { return m_ibuf; }
 	OutputBuffer* GetOutputBuffer() { return m_obuf; }
 
-	const std::string& GetFilepath() const { return m_filepath; }
+	const CU_STR& GetFilepath() const { return m_filepath; }
 
 	void SetPlayer(AssetPlayer* player) { m_player = player; }
 	AssetPlayer* GetPlayer() { return m_player; }
@@ -89,7 +90,7 @@ private:
 	OutputBuffer* m_obuf;
 
 	// asset
-	std::string  m_filepath;
+	CU_STR  m_filepath;
 	AssetPlayer* m_player;
 
 }; // Source

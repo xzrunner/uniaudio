@@ -3,11 +3,11 @@
 #ifndef _UNIAUDIO_MPG123_DECODER_H_
 #define _UNIAUDIO_MPG123_DECODER_H_
 
+#include <cu/cu_stl.h>
+
 #include "uniaudio/Decoder.h"
 
 #include <mpg123.h>
-
-#include <string>
 
 struct fs_file;
 
@@ -17,7 +17,7 @@ namespace ua
 class Mpg123Decoder : public Decoder
 {
 public:
-	Mpg123Decoder(const std::string& filepath, int buf_sz);
+	Mpg123Decoder(const CU_STR& filepath, int buf_sz);
 	virtual ~Mpg123Decoder();
 
 	virtual int Decode();
@@ -28,7 +28,7 @@ public:
 	virtual int GetChannels() const;
 	virtual int GetBitDepth() const;
 
-	static bool Accepts(const std::string& ext);
+	static bool Accepts(const CU_STR& ext);
 
 	static void Quit();
 

@@ -64,7 +64,7 @@ std::shared_ptr<ua::Source> AudioContext::CreateSource(std::unique_ptr<Decoder>&
 	}
 }
 
-std::shared_ptr<ua::Source> AudioContext::CreateSource(const std::string& filepath, bool stream)
+std::shared_ptr<ua::Source> AudioContext::CreateSource(const CU_STR& filepath, bool stream)
 {
 	if (!m_pool) {
 		return nullptr;
@@ -111,7 +111,7 @@ void AudioContext::InitAAssetMgr(JNIEnv* env, jobject assetManager)
 	m_aasset_mgr = AAssetManager_fromJava(env, assetManager);
 }
 
-bool AudioContext::LoadAssetFile(const std::string& filepath, SLDataLocator_AndroidFD* loc_fd)
+bool AudioContext::LoadAssetFile(const CU_STR& filepath, SLDataLocator_AndroidFD* loc_fd)
 {
 	AAsset* asset = AAssetManager_open(m_aasset_mgr, filepath.c_str(), AASSET_MODE_UNKNOWN);
 	if (!asset) {
