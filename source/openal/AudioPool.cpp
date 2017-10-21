@@ -160,11 +160,8 @@ void AudioPool::Stop(const std::shared_ptr<Source>& source)
 
 void AudioPool::Pause()
 {
-<<<<<<< HEAD
 	CheckOpenal check;
 
-=======
->>>>>>> [FIXED] lost context on resume
 	m_active = false;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -186,11 +183,8 @@ void AudioPool::Pause(const std::shared_ptr<Source>& source)
 
 void AudioPool::Resume()
 {
-<<<<<<< HEAD
 	CheckOpenal check;
 
-=======
->>>>>>> [FIXED] lost context on resume
 	m_active = true;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
