@@ -7,18 +7,17 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := uniaudio
 
 LOCAL_C_INCLUDES  := \
+	${CLIB_PATH} \
 	${UNIAUDIO_SRC_PATH}/include \
 	${LOGGER_SRC_PATH} \
 	${FS_SRC_PATH} \
-	${CU_SRC_PATH} \
 	${MPG123_SRC_PATH} \
 	${OPENAL_SRC_PATH} \
 	${MULTITASK_SRC_PATH}/include \
+	${MEMMGR_SRC_PATH}/include \
 
 LOCAL_SRC_FILES := \
 	$(subst $(LOCAL_PATH)/,,$(shell find $(LOCAL_PATH) -name "*.cpp" -print)) \
-
-LOCAL_CPPFLAGS  := -std=c++11
 
 LOCAL_STATIC_LIBRARIES := \
 	logger \
