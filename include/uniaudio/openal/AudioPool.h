@@ -50,10 +50,10 @@ private:
 		QueuePlayer();
 		~QueuePlayer();
 
-		void Update(const CU_SET<std::shared_ptr<Source>>& playing);
+		void Update(const std::set<std::shared_ptr<Source>>& playing);
 
 	private:
-		void Stream(ALuint buffer, const CU_SET<std::shared_ptr<Source>>& playing);
+		void Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing);
 
 	private:
 		ALuint     m_source;
@@ -67,7 +67,7 @@ private:
 private:
 	std::mutex m_mutex;
 
-	CU_SET<std::shared_ptr<Source>> m_playing;
+	std::set<std::shared_ptr<Source>> m_playing;
 
 	// asset
 	static const int NUM_ASSET_PLAYERS = 16;
