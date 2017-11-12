@@ -27,16 +27,16 @@ public:
 	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder);
 	virtual ~Source();
 
-	virtual bool Update();
+	virtual bool Update() override final;
 
-	virtual void Play();
-	virtual void Stop();
-	virtual void Pause();
-	virtual void Resume();
-	virtual void Rewind();
+	virtual void Play() override final;
+	virtual void Stop() override final;
+	virtual void Pause() override final;
+	virtual void Resume() override final;
+	virtual void Rewind() override final;
 
-	virtual void Seek(float offset);
-	virtual float Tell();
+	virtual void Seek(float offset) override final;
+	virtual float Tell() override final;
 
 	void PlayImpl();
 	void StopImpl();

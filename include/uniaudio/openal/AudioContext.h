@@ -20,14 +20,14 @@ public:
 	AudioContext(ALCdevice* device, ALCcontext* context);
 	virtual ~AudioContext();
 
-	virtual std::shared_ptr<ua::Source> CreateSource(const AudioData* data);
-	virtual std::shared_ptr<ua::Source> CreateSource(std::unique_ptr<Decoder>& decoder);
-	virtual std::shared_ptr<ua::Source> CreateSource(const CU_STR& filepath, bool stream);
+	virtual std::shared_ptr<ua::Source> CreateSource(const AudioData* data) override final;
+	virtual std::shared_ptr<ua::Source> CreateSource(std::unique_ptr<Decoder>& decoder) override final;
+	virtual std::shared_ptr<ua::Source> CreateSource(const CU_STR& filepath, bool stream) override final;
 
-	virtual void Stop();
-	virtual void Pause();
-	virtual void Resume();
-	virtual void Rewind();
+	virtual void Stop() override final;
+	virtual void Pause() override final;
+	virtual void Resume() override final;
+	virtual void Rewind() override final;
 
 public:
 	// 10ms length.

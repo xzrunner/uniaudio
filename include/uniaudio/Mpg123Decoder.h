@@ -20,13 +20,13 @@ public:
 	Mpg123Decoder(const CU_STR& filepath, int buf_sz);
 	virtual ~Mpg123Decoder();
 
-	virtual int Decode();
+	virtual int Decode() override final;
 
-	virtual bool Seek(float s);
-	virtual bool Rewind();
+	virtual bool Seek(float s) override final;
+	virtual bool Rewind() override final;
 
-	virtual int GetChannels() const;
-	virtual int GetBitDepth() const;
+	virtual int GetChannels() const override final;
+	virtual int GetBitDepth() const override final;
 
 	static bool Accepts(const CU_STR& ext);
 
