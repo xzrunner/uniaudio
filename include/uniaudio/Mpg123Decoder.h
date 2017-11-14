@@ -18,7 +18,10 @@ class Mpg123Decoder : public Decoder
 {
 public:
 	Mpg123Decoder(const CU_STR& filepath, int buf_sz);
+	Mpg123Decoder(const Mpg123Decoder&);
 	virtual ~Mpg123Decoder();
+
+	virtual Decoder* Clone();
 
 	virtual int Decode() override final;
 
@@ -37,6 +40,7 @@ private:
 	void InitMpg123();
 
 private:
+	CU_STR m_filepath;
 	fs_file* m_file;
 
 	mpg123_handle* m_handle;

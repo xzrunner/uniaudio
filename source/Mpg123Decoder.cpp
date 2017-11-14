@@ -19,6 +19,7 @@ bool Mpg123Decoder::m_inited = false;
 
 Mpg123Decoder::Mpg123Decoder(const CU_STR& filepath, int buf_sz)
 	: Decoder(buf_sz)
+	, m_filepath(filepath)
 	, m_file(nullptr)
 	, m_handle(nullptr)
 	, m_channels(MPG123_STEREO)
@@ -30,6 +31,20 @@ Mpg123Decoder::Mpg123Decoder(const CU_STR& filepath, int buf_sz)
 	}
 }
 
+Mpg123Decoder::Mpg123Decoder(const Mpg123Decoder& src)
+	: Decoder(src)
+	, m_filepath(src.m_filepath)
+	, m_file(nullptr)
+	, m_handle(nullptr)
+	, m_channels(src.m_channels)
+{
+	m_file = fs_open(m_filepath.c_str(), "rb");
+	if (m_file) {
+		InitHandle();
+	}
+
+}
+
 Mpg123Decoder::~Mpg123Decoder()
 {
 	if (m_file) {
@@ -38,6 +53,11 @@ Mpg123Decoder::~Mpg123Decoder()
 	if (m_handle) {
 		mpg123_delete(m_handle);
 	}
+}
+
+Decoder* Mpg123Decoder::Clone()
+{
+	return new Mpg123Decoder(*this);
 }
 
 int Mpg123Decoder::Decode()

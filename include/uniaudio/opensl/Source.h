@@ -25,7 +25,10 @@ class Source : public ua::Source, public std::enable_shared_from_this<Source>
 public:
 	Source(AudioPool* pool, const CU_STR& filepath);
 	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder);
+	Source(const Source&);
 	virtual ~Source();
+
+	virtual std::shared_ptr<ua::Source> Clone() override final;
 
 	virtual bool Update() override final;
 

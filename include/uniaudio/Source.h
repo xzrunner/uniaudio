@@ -3,6 +3,8 @@
 
 #include <cu/uncopyable.h>
 
+#include <memory>
+
 namespace ua
 {
 
@@ -11,6 +13,8 @@ class Source : private cu::Uncopyable
 public:
 	Source() {}
 	virtual ~Source() {}
+
+	virtual std::shared_ptr<Source> Clone() = 0;
 
 	virtual bool Update() = 0;
 

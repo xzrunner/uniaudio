@@ -53,6 +53,38 @@ Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder)
 	}
 }
 
+Source::Source(const Source& src)
+	: m_pool(src.m_pool)
+	, m_looping(src.m_looping)
+	, m_active(src.m_active)
+	, m_paused(src.m_paused)
+	, m_offset(src.m_offset)
+	, m_stream(src.m_stream)
+	, m_ibuf(nullptr)
+	, m_obuf(nullptr)
+	, m_filepath(src.m_filepath)
+	, m_player(nullptr)
+{
+	if (src.m_ibuf) 
+	{
+		auto decoder = std::unique_ptr<Decoder>(src.m_ibuf->GetDecoder()->Clone());
+		m_ibuf = new InputBuffer(decoder);
+		if (!m_ibuf) {
+			throw Exception("Could not create InputBuffer.");
+		}
+
+		const int HZ = decoder->GetSampleRate();
+		const int depth = decoder->GetBitDepth();
+		const int channels = decoder->GetChannels();
+		const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
+		int buf_sz = depth * channels * samples / 8;
+		m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
+		if (!m_obuf) {
+			throw Exception("Could not create OutputBuffer.");
+		}
+	}
+}
+
 Source::~Source()
 {
 	if (m_active) {
@@ -64,6 +96,11 @@ Source::~Source()
 	if (m_obuf) {
 		delete m_obuf;
 	}
+}
+
+std::shared_ptr<ua::Source> Source::Clone()
+{
+	return std::make_shared<Source>(*this);
 }
 
 bool Source::Update()

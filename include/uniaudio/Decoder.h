@@ -33,7 +33,10 @@ public:
 	static const int DEFAULT_BIT_DEPTH = 16;
 
 	Decoder(int buf_sz = DEFAULT_BUFFER_SIZE);
+	Decoder(const Decoder&);
 	virtual ~Decoder();
+
+	virtual Decoder* Clone() = 0;
 
 	virtual int Decode() = 0;
 
