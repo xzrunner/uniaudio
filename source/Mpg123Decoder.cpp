@@ -122,6 +122,11 @@ int Mpg123Decoder::GetBitDepth() const
 	return 16;
 }
 
+float Mpg123Decoder::GetLength() const
+{
+	return m_length == 0 ? 0 : (float)m_length / m_sample_rate;
+}
+
 bool Mpg123Decoder::Accepts(const CU_STR& ext)
 {
 	return ext == "mp3";
@@ -257,6 +262,8 @@ void Mpg123Decoder::InitHandle()
 	mpg123_format(m_handle, rate, m_channels, MPG123_ENC_SIGNED_16);
 
 	m_sample_rate = rate;
+
+	m_length = mpg123_length(m_handle);
 }
 
 void Mpg123Decoder::InitMpg123()

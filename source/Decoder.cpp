@@ -10,6 +10,7 @@ Decoder::Decoder(int buf_sz)
 	, m_offset(0)
 	, m_eof(false)
 	, m_sample_rate(DEFAULT_SAMPLE_RATE)
+	, m_length(0)
 {
 	m_buf = new unsigned char[buf_sz];
 	if (!m_buf) {
@@ -23,6 +24,7 @@ Decoder::Decoder(const Decoder& src)
 	, m_offset(src.m_offset)
 	, m_eof(src.m_eof)
 	, m_sample_rate(src.m_sample_rate)
+	, m_length(src.m_length)
 {
 	m_buf = new unsigned char[m_buf_size];
 	if (!m_buf) {

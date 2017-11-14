@@ -73,6 +73,8 @@ private:
 //	int GetFreq() const;
 	float GetCurrOffset(int freq);
 
+	void UpdateCurrVolume();
+
 private:
 	static const int OUTPUT_BUF_COUNT = 16;
 
@@ -83,8 +85,8 @@ private:
 	bool m_active;
 	bool m_paused;
 
-	int m_freq;
-	float m_offset;	// seconds
+	int   m_freq;
+	float m_curr_offset;	// seconds
 
 	const bool m_stream;
 	const bool m_mix;

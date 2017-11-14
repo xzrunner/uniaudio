@@ -15,7 +15,7 @@ public:
 	AudioMixer(float buf_time_len);
 	~AudioMixer();
 
-	void Input(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel);
+	void Input(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel, float volume);
 	int16_t* Output();
 
 	int GetSamples() const { return m_samples; }
@@ -33,8 +33,8 @@ public:
 	static const int DEFAULT_BIT_DEPTH = 16;
 
 private:
-	void MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel);
-	void MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel);
+	void MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel, float volume);
+	void MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bit_depth, int channel, float volume);
 
 private:
 	int32_t* m_mix_buffer;

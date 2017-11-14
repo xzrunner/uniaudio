@@ -24,6 +24,11 @@ public:
 
 	void Seek(float offset, bool looping);
 
+	// return second
+	float GetOffset() const;
+
+	void Rewind();
+	
 private:
 	void Reload(bool looping);
 
@@ -31,6 +36,8 @@ private:
 	std::unique_ptr<Decoder> m_decoder;
 
 	int m_size, m_used;
+
+	float m_offset;
 
 }; // InputBuffer
 

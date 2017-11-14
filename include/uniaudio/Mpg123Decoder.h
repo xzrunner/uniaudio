@@ -31,6 +31,8 @@ public:
 	virtual int GetChannels() const override final;
 	virtual int GetBitDepth() const override final;
 
+	virtual float GetLength() const override final;
+
 	static bool Accepts(const CU_STR& ext);
 
 	static void Quit();

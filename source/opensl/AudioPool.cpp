@@ -236,7 +236,7 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 		float offset = samples / hz;
 		source->UpdataOffset(offset);
 
-		m_queue_mixer.Input(buf, buf_sz, hz, depth, channels);
+		m_queue_mixer.Input(buf, buf_sz, hz, depth, channels, 1);
 	}
 
 	int16_t* buf = m_queue_mixer.Output();

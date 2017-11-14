@@ -22,7 +22,7 @@ Source::Source(AudioPool* pool, const AudioData* data)
 	, m_active(false)
 	, m_paused(false)
 	, m_freq(data->GetSampleRate())
-	, m_offset(0)
+	, m_curr_offset(0)
 	, m_stream(false)
 	, m_mix(false)
 	, m_ibuf(nullptr)
@@ -57,12 +57,13 @@ Source::Source(AudioPool* pool, const AudioData* data)
 }
 
 Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder, bool mix)
-	: m_pool(pool)
+	: ua::Source(*decoder)
+	, m_pool(pool)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
 	, m_freq(decoder->GetSampleRate())
-	, m_offset(0)
+	, m_curr_offset(0)
 	, m_stream(true)
 	, m_mix(mix)
 	, m_ibuf(nullptr)
@@ -98,12 +99,13 @@ Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder, bool mix)
 }
 
 Source::Source(const Source& src)
-	: m_pool(src.m_pool)
+	: ua::Source(src)
+	, m_pool(src.m_pool)
 	, m_looping(src.m_looping)
 	, m_active(src.m_active)
 	, m_paused(src.m_paused)
 	, m_freq(src.m_freq)
-	, m_offset(src.m_offset)
+	, m_curr_offset(src.m_curr_offset)
 	, m_stream(src.m_stream)
 	, m_mix(src.m_mix)
 	, m_ibuf(nullptr)
@@ -137,7 +139,7 @@ Source::Source(const Source& src)
 		{
 			alGetError();
 			alGenBuffers(MAX_BUFFERS, m_buffers);
-			if (ALenum err = alGetError() != AL_NO_ERROR)  {
+			if (ALenum err = alGetError() != AL_NO_ERROR) {
 				throw Exception("Gen openal buffers error: %x\n", err);
 			}
 		}
@@ -157,7 +159,8 @@ Source::~Source()
 		if (!m_mix) {
 			alDeleteBuffers(MAX_BUFFERS, m_buffers);
 		}
-	} else {
+	}
+	else {
 		assert(!m_mix);
 		alDeleteBuffers(1, m_buffers);
 	}
@@ -184,10 +187,12 @@ bool Source::Update()
 		assert(!m_mix);
 		alSourcei(m_player, AL_LOOPING, IsLooping() ? AL_TRUE : AL_FALSE);
 		return !IsStopped();
-	} else if (!IsLooping() && IsFinished()) {
+	}
+	else if (!IsLooping() && IsFinished()) {
 		return false;
 	}
 
+	UpdateCurrVolume();
 	if (m_mix)
 	{
 		assert(m_ibuf && m_obuf);
@@ -195,6 +200,9 @@ bool Source::Update()
 	}
 	else
 	{
+		// set volume
+		alSourcef(m_player, AL_GAIN, m_curr_volume);
+
 		ALint processed = 0;
 		alGetSourcei(m_player, AL_BUFFERS_PROCESSED, &processed);
 		while (processed--)
@@ -205,7 +213,7 @@ bool Source::Update()
 			alSourceUnqueueBuffers(m_player, 1, &buffer);
 
 			float new_offset_seconds = GetCurrOffset(m_freq);
-			m_offset += old_offset_seconds - new_offset_seconds;
+			m_curr_offset += old_offset_seconds - new_offset_seconds;
 
 			if (Stream(buffer) > 0) {
 				alSourceQueueBuffers(m_player, 1, &buffer);
@@ -268,6 +276,8 @@ float Source::Tell()
 
 void Source::PlayImpl()
 {
+	m_curr_offset = 0;
+
 	if (m_stream)
 	{
 		if (!m_mix)
@@ -369,7 +379,7 @@ void Source::RewindImpl()
 		{
 			bool paused = m_paused;
 			assert(m_ibuf);
-			m_ibuf->GetDecoder()->Rewind();
+			m_ibuf->Rewind();
 			StopImpl();
 			PlayImpl();
 			if (paused) {
@@ -390,7 +400,7 @@ void Source::RewindImpl()
 		if (m_stream)
 		{
 			assert(m_ibuf);
-			m_ibuf->GetDecoder()->Rewind();
+			m_ibuf->Rewind();
 		}
 	}
 }
@@ -403,7 +413,7 @@ void Source::SeekImpl(float offset)
 
 	if (m_stream) 
 	{
-		m_offset = offset;
+		m_curr_offset = offset;
 
 		bool looping = IsLooping();
 		m_ibuf->Seek(offset, looping);
@@ -434,7 +444,7 @@ float Source::TellImpl()
 	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset);
 	offset /= m_freq;
 	if (m_stream) {
-		offset += m_offset;
+		offset += m_curr_offset;
 	}
 	return offset;
 }
@@ -552,6 +562,18 @@ float Source::GetCurrOffset(int freq)
 	alGetSourcef(m_player, AL_SAMPLE_OFFSET, &offset_samples);
 	float offset_seconds = offset_samples / freq;
 	return offset_seconds;
+}
+
+void Source::UpdateCurrVolume()
+{
+	m_curr_volume = m_ori_volume;
+
+	float offset = m_mix ? m_ibuf->GetOffset() : m_curr_offset;
+	if (m_fade_in > 0 && offset < m_fade_in) {
+		m_curr_volume = m_ori_volume * offset / m_fade_in;
+	} else if (m_fade_out > 0 && m_duration != 0 && m_duration - offset < m_fade_out) {
+		m_curr_volume = m_ori_volume * (m_duration - offset) / m_fade_out;
+	}
 }
 
 }

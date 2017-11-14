@@ -346,7 +346,7 @@ Stream(ALuint buffer, const std::set<std::shared_ptr<Source>>& playing)
 		int depth = decoder->GetBitDepth();
 		int channels = decoder->GetChannels();
 
-		m_mixer.Input(buf, buf_sz, hz, depth, channels);
+		m_mixer.Input(buf, buf_sz, hz, depth, channels, source->GetCurrVolume());
 	}
 
 	int16_t* buf = m_mixer.Output();

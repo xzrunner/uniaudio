@@ -8,10 +8,14 @@
 namespace ua
 {
 
+class Decoder;
+
 class Source : private cu::Uncopyable
 {
 public:
-	Source() {}
+	Source();
+	Source(const Source&);
+	Source(const Decoder& decoder);
 	virtual ~Source() {}
 
 	virtual std::shared_ptr<Source> Clone() = 0;
@@ -26,6 +30,17 @@ public:
 
 	virtual void Seek(float offset) = 0;
 	virtual float Tell() = 0;
+
+	void SetFadeIn(float time) { m_fade_in = time; }
+	void SetFadeOut(float time) { m_fade_out = time; }
+
+	float GetCurrVolume() const { return m_curr_volume; }
+
+protected:
+	float m_offset, m_duration;
+	float m_fade_in, m_fade_out;
+
+	float m_ori_volume, m_curr_volume;
 
 }; // Source
 

@@ -11,6 +11,7 @@ InputBuffer::InputBuffer(std::unique_ptr<Decoder>& decoder)
 	: m_decoder(std::move(decoder))
 	, m_size(0)
 	, m_used(0)
+	, m_offset(0)
 {
 }
 
@@ -27,6 +28,7 @@ void InputBuffer::Output(OutputBuffer* out, bool looping)
 	{
 		int left = m_size - m_used;
 		int sz = out->Input(&m_decoder->GetBuffer()[m_used], left);
+		m_offset += sz;
 		assert(sz <= left);
 		if (sz < left) {
 			m_used += sz;
@@ -56,6 +58,19 @@ void InputBuffer::Seek(float offset, bool looping)
 {
 	m_decoder->Seek(offset);
 	Reload(looping);
+
+	m_offset = m_decoder->GetBitDepth() * m_decoder->GetChannels() * offset * m_decoder->GetSampleRate() / 8;
+}
+
+float InputBuffer::GetOffset() const
+{
+	return m_offset * 8 / m_decoder->GetBitDepth() / m_decoder->GetChannels() / m_decoder->GetSampleRate();
+}
+
+void InputBuffer::Rewind()
+{
+	m_decoder->Rewind();
+	m_offset = 0;
 }
 
 void InputBuffer::Reload(bool looping)
