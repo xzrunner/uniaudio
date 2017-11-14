@@ -149,5 +149,8 @@
     <ClCompile Include="..\..\..\source\Exception.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Source.cpp">
+      <Filter>dataset</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

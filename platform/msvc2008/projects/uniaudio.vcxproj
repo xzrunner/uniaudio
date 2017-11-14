@@ -138,6 +138,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)opensl\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\source\OutputBuffer.cpp" />
+    <ClCompile Include="..\..\..\source\Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
