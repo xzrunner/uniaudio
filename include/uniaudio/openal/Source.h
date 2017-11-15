@@ -75,6 +75,8 @@ private:
 
 	void UpdateCurrVolume();
 
+	float GetCurrOffset() const;
+
 private:
 	static const int OUTPUT_BUF_COUNT = 16;
 

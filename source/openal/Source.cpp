@@ -189,7 +189,7 @@ bool Source::Update()
 		return !IsStopped();
 	} else if (!IsLooping() && IsFinished()) {
 		return false;
-	} else if (m_duration != 0 && m_curr_offset > m_offset + m_duration) {
+	} else if (m_duration != 0 && GetCurrOffset() > m_offset + m_duration) {
 		StopImpl();
 		return false;
 	}
@@ -585,12 +585,17 @@ void Source::UpdateCurrVolume()
 {
 	m_curr_volume = m_ori_volume;
 
-	float offset = m_mix ? m_ibuf->GetOffset() : m_curr_offset;
+	float offset = GetCurrOffset();
 	if (m_fade_in > 0 && offset < m_fade_in) {
 		m_curr_volume = m_ori_volume * offset / m_fade_in;
 	} else if (m_fade_out > 0 && m_duration != 0 && m_duration - offset < m_fade_out) {
 		m_curr_volume = m_ori_volume * (m_duration - offset) / m_fade_out;
 	}
+}
+
+float Source::GetCurrOffset() const
+{
+	return m_mix ? m_ibuf->GetOffset() : m_curr_offset;
 }
 
 }
