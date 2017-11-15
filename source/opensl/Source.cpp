@@ -42,9 +42,10 @@ Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder)
 		throw Exception("Could not create InputBuffer.");
 	}
 
-	const int HZ = decoder->GetSampleRate();
-	const int depth = decoder->GetBitDepth();
-	const int channels = decoder->GetChannels();
+	auto& dc = m_ibuf->GetDecoder();
+	const int HZ = dc->GetSampleRate();
+	const int depth = dc->GetBitDepth();
+	const int channels = dc->GetChannels();
 	const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 	int buf_sz = depth * channels * samples / 8;
 	m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
@@ -73,9 +74,10 @@ Source::Source(const Source& src)
 			throw Exception("Could not create InputBuffer.");
 		}
 
-		const int HZ = decoder->GetSampleRate();
-		const int depth = decoder->GetBitDepth();
-		const int channels = decoder->GetChannels();
+		auto& dc = m_ibuf->GetDecoder();
+		const int HZ = dc->GetSampleRate();
+		const int depth = dc->GetBitDepth();
+		const int channels = dc->GetChannels();
 		const int samples = static_cast<int>(HZ * AudioContext::BUFFER_TIME_LEN);
 		int buf_sz = depth * channels * samples / 8;
 		m_obuf = new OutputBuffer(OUTPUT_BUF_COUNT, buf_sz);
