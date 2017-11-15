@@ -31,6 +31,9 @@ public:
 	virtual void Seek(float offset) = 0;
 	virtual float Tell() = 0;
 
+	void SetOffset(float offset) { m_offset = offset; }
+	void SetDuration(float duration) { m_duration = duration; }
+
 	void SetFadeIn(float time) { m_fade_in = time; }
 	void SetFadeOut(float time) { m_fade_out = time; }
 

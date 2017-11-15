@@ -187,12 +187,16 @@ bool Source::Update()
 		assert(!m_mix);
 		alSourcei(m_player, AL_LOOPING, IsLooping() ? AL_TRUE : AL_FALSE);
 		return !IsStopped();
-	}
-	else if (!IsLooping() && IsFinished()) {
+	} else if (!IsLooping() && IsFinished()) {
+		return false;
+	} else if (m_duration != 0 && m_curr_offset > m_offset + m_duration) {
+		StopImpl();
 		return false;
 	}
 
+	// fade
 	UpdateCurrVolume();
+
 	if (m_mix)
 	{
 		assert(m_ibuf && m_obuf);
@@ -276,7 +280,20 @@ float Source::Tell()
 
 void Source::PlayImpl()
 {
-	m_curr_offset = 0;
+	// init offset
+	m_curr_offset = m_offset;
+	if (m_offset != 0)
+	{
+		if (m_stream) {
+			bool looping = IsLooping();
+			m_ibuf->Seek(m_offset, looping);
+			if (m_mix) {
+				m_ibuf->Output(m_obuf, looping);
+			}
+		} else {
+			alSourcef(m_player, AL_SEC_OFFSET, m_offset);
+		}
+	}
 
 	if (m_stream)
 	{
