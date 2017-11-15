@@ -18,7 +18,7 @@ Source::Source(AudioPool* pool, const CU_STR& filepath)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
-	, m_offset(0)
+	, m_curr_offset(0)
 	, m_stream(false)
 	, m_ibuf(nullptr)
 	, m_obuf(nullptr)
@@ -32,7 +32,7 @@ Source::Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder)
 	, m_looping(false)
 	, m_active(false)
 	, m_paused(false)
-	, m_offset(0)
+	, m_curr_offset(0)
 	, m_stream(true)
 	, m_ibuf(nullptr)
 	, m_player(nullptr)
@@ -59,7 +59,7 @@ Source::Source(const Source& src)
 	, m_looping(src.m_looping)
 	, m_active(src.m_active)
 	, m_paused(src.m_paused)
-	, m_offset(src.m_offset)
+	, m_curr_offset(src.m_curr_offset)
 	, m_stream(src.m_stream)
 	, m_ibuf(nullptr)
 	, m_obuf(nullptr)
@@ -115,7 +115,13 @@ bool Source::Update()
 		return !IsStopped();
 	} else if (!IsLooping() && IsFinished()) {
 		return false;
+	} else if (m_duration != 0 && m_curr_offset > m_offset + m_duration) {
+		StopImpl();
+		return false;
 	}
+
+	// fade
+	UpdateCurrVolume();
 
 	Stream();
 
@@ -138,7 +144,7 @@ void Source::Play()
 	}
 	m_active = m_pool->Play(shared_from_this());
 	if (!m_active) {
-		m_offset = 0;
+		m_curr_offset = 0;
 	}
 }
 
@@ -176,6 +182,9 @@ float Source::Tell()
 
 void Source::PlayImpl()
 {
+	// init offset
+	m_curr_offset = m_offset;
+
 	if (m_stream)
 	{
 	}
@@ -194,7 +203,7 @@ void Source::StopImpl()
 		return;
 	}
 
-	m_offset = 0;
+	m_curr_offset = 0;
 
 	if (m_stream)
 	{
@@ -281,7 +290,7 @@ void Source::SeekImpl(float offset)
 
 	if (m_stream)
 	{
-		m_offset = offset;
+		m_curr_offset = offset;
 
 		bool looping = IsLooping();
 		m_ibuf->Seek(offset, looping);
@@ -302,7 +311,7 @@ void Source::SeekImpl(float offset)
 
 float Source::TellImpl()
 {
-	return m_active ? m_offset : 0;
+	return m_active ? m_curr_offset : 0;
 }
 
 bool Source::IsStopped() const
@@ -329,6 +338,18 @@ void Source::Stream()
 {
 	assert(m_ibuf && m_obuf);
 	m_ibuf->Output(m_obuf, IsLooping());
+}
+
+void Source::UpdateCurrVolume()
+{
+	m_curr_volume = m_ori_volume;
+
+	float offset = m_ibuf->GetOffset();
+	if (m_fade_in > 0 && offset < m_fade_in) {
+		m_curr_volume = m_ori_volume * offset / m_fade_in;
+	} else if (m_fade_out > 0 && m_duration != 0 && m_duration - offset < m_fade_out) {
+		m_curr_volume = m_ori_volume * (m_duration - offset) / m_fade_out;
+	}
 }
 
 }

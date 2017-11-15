@@ -69,10 +69,12 @@ public:
 
 	bool IsStream() const { return m_stream; }
 
-	void UpdataOffset(float dt) { m_offset += dt; }
+	void UpdataOffset(float dt) { m_curr_offset += dt; }
 
 private:
 	void Stream();
+
+	void UpdateCurrVolume();
 
 private:
 	static const int OUTPUT_BUF_COUNT = 16;
@@ -84,7 +86,7 @@ private:
 	bool m_active;
 	bool m_paused;
 
-	float m_offset;	// seconds
+	float m_curr_offset;	// seconds
 
 	const bool m_stream;
 
