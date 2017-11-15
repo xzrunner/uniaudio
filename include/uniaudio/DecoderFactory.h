@@ -1,9 +1,11 @@
 #ifndef _UNIAUDIO_DECODER_FACTORY_H_
 #define _UNIAUDIO_DECODER_FACTORY_H_
 
+#include "uniaudio/Decoder.h"
+
 #include <cu/cu_stl.h>
 
-#include "uniaudio/Decoder.h"
+#include <memory>
 
 namespace ua
 {

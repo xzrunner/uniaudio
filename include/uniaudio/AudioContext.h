@@ -3,6 +3,8 @@
 
 #include <cu/cu_stl.h>
 
+#include <memory>
+
 namespace ua
 {
 
