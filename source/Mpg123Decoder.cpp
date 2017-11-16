@@ -17,7 +17,7 @@ namespace ua
 
 bool Mpg123Decoder::m_inited = false;
 
-Mpg123Decoder::Mpg123Decoder(const CU_STR& filepath, int buf_sz)
+Mpg123Decoder::Mpg123Decoder(const std::string& filepath, int buf_sz)
 	: Decoder(buf_sz)
 	, m_filepath(filepath)
 	, m_file(nullptr)

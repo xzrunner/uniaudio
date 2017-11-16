@@ -70,10 +70,10 @@ std::shared_ptr<ua::Source> AudioContext::CreateSource(const CU_STR& filepath, b
 		return nullptr;
 	}
 	if (stream) {
-		auto decoder = DecoderFactory::Create(filepath);
+		auto decoder = DecoderFactory::Create(filepath.c_str());
 		return std::make_shared<Source>(m_pool, decoder);
 	} else {
-		return std::make_shared<Source>(m_pool, filepath);
+		return std::make_shared<Source>(m_pool, filepath.c_str());
 	}
 }
 

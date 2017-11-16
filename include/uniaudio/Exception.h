@@ -11,7 +11,7 @@ namespace ua
 class Exception : public std::exception
 {
 public:
-	Exception(const CU_STR& msg);
+	Exception(const std::string& msg);
 	Exception(const char* fmt, ...);
 	virtual ~Exception() throw() {}
 
@@ -20,7 +20,7 @@ public:
 	}
 
 private:
-	CU_STR m_message;
+	std::string m_message;
 
 }; // Exception 
 

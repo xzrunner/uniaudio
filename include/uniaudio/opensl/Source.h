@@ -23,7 +23,7 @@ class AudioPool;
 class Source : public ua::Source, public std::enable_shared_from_this<Source>
 {
 public:
-	Source(AudioPool* pool, const CU_STR& filepath);
+	Source(AudioPool* pool, const std::string& filepath);
 	Source(AudioPool* pool, std::unique_ptr<Decoder>& decoder);
 	Source(const Source&);
 	virtual ~Source();
@@ -56,7 +56,7 @@ public:
 	const InputBuffer* GetInputBuffer() const { return m_ibuf; }
 	OutputBuffer* GetOutputBuffer() { return m_obuf; }
 
-	const CU_STR& GetFilepath() const { return m_filepath; }
+	const std::string& GetFilepath() const { return m_filepath; }
 
 	void SetPlayer(AssetPlayer* player) { m_player = player; }
 	AssetPlayer* GetPlayer() { return m_player; }
@@ -95,7 +95,7 @@ private:
 	OutputBuffer* m_obuf;
 
 	// asset
-	CU_STR  m_filepath;
+	std::string  m_filepath;
 	AssetPlayer* m_player;
 
 }; // Source

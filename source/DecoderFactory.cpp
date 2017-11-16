@@ -22,11 +22,11 @@ std::unique_ptr<Decoder> DecoderFactory::Create(const CU_STR& filepath, int buf_
 		;
 #ifndef UA_NO_MPG123
 	else if (Mpg123Decoder::Accepts(ext))
-		decoder = std::make_unique<Mpg123Decoder>(filepath, buf_sz);
+		decoder = std::make_unique<Mpg123Decoder>(filepath.c_str(), buf_sz);
 #endif // UA_NO_MPG123
 #ifdef UA_SUPPORT_COREAUDIO
 	else if (CoreAudioDecoder::Accepts(ext))
-		decoder = std::make_unique<CoreAudioDecoder>(filepath, buf_sz);
+		decoder = std::make_unique<CoreAudioDecoder>(filepath.c_str(), buf_sz);
 #endif // UA_SUPPORT_COREAUDIO
 
 	return decoder;
