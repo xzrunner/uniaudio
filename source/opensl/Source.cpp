@@ -347,8 +347,8 @@ void Source::UpdateCurrVolume()
 	float offset = m_ibuf->GetOffset();
 	if (m_fade_in > 0 && offset < m_fade_in) {
 		m_curr_volume = m_ori_volume * offset / m_fade_in;
-	} else if (m_fade_out > 0 && m_duration != 0 && m_duration - offset < m_fade_out) {
-		m_curr_volume = m_ori_volume * (m_duration - offset) / m_fade_out;
+	} else if (m_fade_out > 0 && m_duration + m_offset - offset < m_fade_out) {
+		m_curr_volume = m_ori_volume * (m_duration + m_offset - offset) / m_fade_out;
 	}
 }
 
