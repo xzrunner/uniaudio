@@ -21,13 +21,19 @@ public:
 	CoreAudioDecoder(const CU_STR& filepath, int buf_sz);
 	virtual ~CoreAudioDecoder();
 
-	virtual int Decode();
+	// todo
+	virtual Decoder* Clone() { return nullptr; }
 
-	virtual bool Seek(float s);
-	virtual bool Rewind();
+	virtual int Decode() final;
 
-	virtual int GetChannels() const;
-	virtual int GetBitDepth() const;
+	virtual bool Seek(float s) final;
+	virtual bool Rewind() final;
+
+	virtual int GetChannels() const final;
+	virtual int GetBitDepth() const final;
+
+	// todo
+	virtual float GetLength() const override final { return 0; }
 
 	static bool Accepts(const CU_STR& ext);
 

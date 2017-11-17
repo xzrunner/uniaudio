@@ -7,6 +7,7 @@
 #endif // UA_SUPPORT_COREAUDIO
 
 #include <algorithm>
+#include <memory>
 
 namespace ua
 {
