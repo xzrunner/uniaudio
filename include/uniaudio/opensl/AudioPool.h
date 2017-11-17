@@ -17,6 +17,7 @@
 #else
 #include <mutex>
 #endif
+#include <memory>
 
 namespace ua
 {
