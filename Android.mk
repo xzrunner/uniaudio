@@ -19,6 +19,8 @@ LOCAL_C_INCLUDES  := \
 LOCAL_SRC_FILES := \
 	$(subst $(LOCAL_PATH)/,,$(shell find $(LOCAL_PATH) -name "*.cpp" -print)) \
 
+LOCAL_CPPFLAGS  := -std=c++14
+
 LOCAL_STATIC_LIBRARIES := \
 	logger \
 	fs \
