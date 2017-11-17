@@ -15,6 +15,7 @@
 #include <mutex>
 #endif
 #include <atomic>
+#include <memory>
 
 namespace ua
 {
