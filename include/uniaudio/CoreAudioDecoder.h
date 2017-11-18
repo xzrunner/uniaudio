@@ -18,11 +18,11 @@ namespace ua
 class CoreAudioDecoder : public Decoder
 {
 public:	
-	CoreAudioDecoder(const CU_STR& filepath, int buf_sz);
+	CoreAudioDecoder(const std::string& filepath, int buf_sz);
+	CoreAudioDecoder(const CoreAudioDecoder&);
 	virtual ~CoreAudioDecoder();
 
-	// todo
-	virtual Decoder* Clone() { return nullptr; }
+	virtual Decoder* Clone();
 
 	virtual int Decode() final;
 
@@ -32,13 +32,14 @@ public:
 	virtual int GetChannels() const final;
 	virtual int GetBitDepth() const final;
 
-	// todo
-	virtual float GetLength() const override final { return 0; }
+	virtual float GetDuration() const override final;
 
 	static bool Accepts(const CU_STR& ext);
 
 private:
 	void CloseAudioFile();
+
+	void Init();
 
 public:
 	struct Data
@@ -51,13 +52,16 @@ public:
 	};
 
 private:
-	Data m_source;
+	std::string m_filepath;	
+	Data        m_source;
 
-	AudioFileID m_audio_file;
+	AudioFileID     m_audio_file;
 	ExtAudioFileRef m_ext_audio_file;
 
 	AudioStreamBasicDescription m_input_info;
 	AudioStreamBasicDescription m_output_info;
+
+	mutable float m_duration;
 
 }; // CoreAudioDecoder
 

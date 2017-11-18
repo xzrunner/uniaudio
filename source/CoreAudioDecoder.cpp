@@ -39,78 +39,34 @@ SInt64 get_size_func(void* in_client_data)
 }
 } // callbacks
 
-CoreAudioDecoder::CoreAudioDecoder(const CU_STR& filepath, int buf_sz)
+CoreAudioDecoder::CoreAudioDecoder(const std::string& filepath, int buf_sz)
 	: Decoder(buf_sz)
+	, m_filepath(filepath)
 	, m_audio_file(nullptr)
 	, m_ext_audio_file(nullptr)
+	, m_duration(-2)
 {
-	try 
-	{
-		m_source.file = fs_open(filepath.c_str(), "rb");
-		if (!m_source.file) {
-			throw Exception("Could not open file: %s", filepath.c_str());
-		}
-		m_source.size = fs_size(m_source.file);
-		
-		OSStatus err = noErr;
+	Init();
+}
 
-		// Open the file represented by the Data.
-		err = AudioFileOpenWithCallbacks(&m_source, read_func, nullptr, get_size_func, nullptr, kAudioFileMP3Type, &m_audio_file);
-		if (err != noErr) {
-			throw Exception("Could not open audio file for decoding.");
-		}
-
-		// We want to use the Extended AudioFile API.
-		err = ExtAudioFileWrapAudioFileID(m_audio_file, false, &m_ext_audio_file);
-		if (err != noErr) {
-			throw Exception("Could not get extended api for decoding.");
-		}
-
-		// Get the format of the audio data.
-		UInt32 property_size = sizeof(m_input_info);
-		err = ExtAudioFileGetProperty(m_ext_audio_file, kExtAudioFileProperty_FileDataFormat, &property_size, &m_input_info);
-		if (err != noErr) {
-			throw Exception("Could not determine file format.");
-		}
-
-		// Set the output format to 16 bit signed integer (native-endian) data.
-		// Keep the channel count and sample rate of the source format.
-		m_output_info.mSampleRate = m_input_info.mSampleRate;
-		m_output_info.mChannelsPerFrame = m_input_info.mChannelsPerFrame;
-
-		int bytes = (m_input_info.mBitsPerChannel == 8) ? 1 : 2;
-
-		m_output_info.mFormatID = kAudioFormatLinearPCM;
-		m_output_info.mBitsPerChannel = bytes * 8;
-		m_output_info.mBytesPerFrame = bytes * m_output_info.mChannelsPerFrame;
-		m_output_info.mFramesPerPacket = 1;
-		m_output_info.mBytesPerPacket = bytes * m_output_info.mChannelsPerFrame;
-		m_output_info.mFormatFlags = kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
-
-		// unsigned 8-bit or signed 16-bit integer PCM data.
-		if (m_output_info.mBitsPerChannel == 16) {
-			m_output_info.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
-		}
-
-		// Set the desired output format.
-		property_size = sizeof(m_output_info);
-		err = ExtAudioFileSetProperty(m_ext_audio_file, kExtAudioFileProperty_ClientDataFormat, property_size, &m_output_info);
-		if (err != noErr) {
-			throw Exception("Could not set decoder properties.");
-		}
-	}
-	catch (Exception& )
-	{
-		CloseAudioFile();
-		throw;
-	}
-
-	m_sample_rate = static_cast<int>(m_output_info.mSampleRate);
+CoreAudioDecoder::CoreAudioDecoder(const CoreAudioDecoder& src)
+	: Decoder(src)
+	, m_filepath(src.m_filepath)
+	, m_audio_file(nullptr)
+	, m_ext_audio_file(nullptr)	
+	, m_duration(-2)	
+{
+	Init();
 }
 
 CoreAudioDecoder::~CoreAudioDecoder()
 {
 	CloseAudioFile();
+}
+
+Decoder* CoreAudioDecoder::Clone()
+{
+	return new CoreAudioDecoder(*this);
 }
 
 int CoreAudioDecoder::Decode()
@@ -179,6 +135,25 @@ int CoreAudioDecoder::GetBitDepth() const
 	return m_output_info.mBitsPerChannel;
 }
 
+float CoreAudioDecoder::GetDuration() const
+{
+	// Only calculate the duration if we haven't done so already.
+	if (m_duration == -2.0)
+	{
+		SInt64 samples = 0;
+		UInt32 psize = (UInt32) sizeof(samples);
+
+		OSStatus err = ExtAudioFileGetProperty(m_ext_audio_file, kExtAudioFileProperty_FileLengthFrames, &psize, &samples);
+
+		if (err == noErr)
+			m_duration = (double) samples / (double) m_sample_rate;
+		else
+			m_duration = -1.0;
+	}
+
+	return m_duration;	
+}
+
 bool CoreAudioDecoder::Accepts(const CU_STR& ext)
 {
 	UInt32 size = 0;
@@ -243,6 +218,72 @@ void CoreAudioDecoder::CloseAudioFile()
 		AudioFileClose(m_audio_file);
 		m_audio_file = nullptr;
 	}
+}
+
+void CoreAudioDecoder::Init()
+{
+	try 
+	{
+		m_source.file = fs_open(m_filepath.c_str(), "rb");
+		if (!m_source.file) {
+			throw Exception("Could not open file: %s", m_filepath.c_str());
+		}
+		m_source.size = fs_size(m_source.file);
+		
+		OSStatus err = noErr;
+
+		// Open the file represented by the Data.
+		err = AudioFileOpenWithCallbacks(&m_source, read_func, nullptr, get_size_func, nullptr, kAudioFileMP3Type, &m_audio_file);
+		if (err != noErr) {
+			throw Exception("Could not open audio file for decoding.");
+		}
+
+		// We want to use the Extended AudioFile API.
+		err = ExtAudioFileWrapAudioFileID(m_audio_file, false, &m_ext_audio_file);
+		if (err != noErr) {
+			throw Exception("Could not get extended api for decoding.");
+		}
+
+		// Get the format of the audio data.
+		UInt32 property_size = sizeof(m_input_info);
+		err = ExtAudioFileGetProperty(m_ext_audio_file, kExtAudioFileProperty_FileDataFormat, &property_size, &m_input_info);
+		if (err != noErr) {
+			throw Exception("Could not determine file format.");
+		}
+
+		// Set the output format to 16 bit signed integer (native-endian) data.
+		// Keep the channel count and sample rate of the source format.
+		m_output_info.mSampleRate = m_input_info.mSampleRate;
+		m_output_info.mChannelsPerFrame = m_input_info.mChannelsPerFrame;
+
+		int bytes = (m_input_info.mBitsPerChannel == 8) ? 1 : 2;
+
+		m_output_info.mFormatID = kAudioFormatLinearPCM;
+		m_output_info.mBitsPerChannel = bytes * 8;
+		m_output_info.mBytesPerFrame = bytes * m_output_info.mChannelsPerFrame;
+		m_output_info.mFramesPerPacket = 1;
+		m_output_info.mBytesPerPacket = bytes * m_output_info.mChannelsPerFrame;
+		m_output_info.mFormatFlags = kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+
+		// unsigned 8-bit or signed 16-bit integer PCM data.
+		if (m_output_info.mBitsPerChannel == 16) {
+			m_output_info.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
+		}
+
+		// Set the desired output format.
+		property_size = sizeof(m_output_info);
+		err = ExtAudioFileSetProperty(m_ext_audio_file, kExtAudioFileProperty_ClientDataFormat, property_size, &m_output_info);
+		if (err != noErr) {
+			throw Exception("Could not set decoder properties.");
+		}
+	}
+	catch (Exception& )
+	{
+		CloseAudioFile();
+		throw;
+	}
+
+	m_sample_rate = static_cast<int>(m_output_info.mSampleRate);
 }
 
 }

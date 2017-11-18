@@ -16,7 +16,7 @@ Source::Source()
 
 Source::Source(const Decoder& decoder)
 	: m_offset(0)
-	, m_duration(decoder.GetLength())
+	, m_duration(decoder.GetDuration())
 	, m_fade_in(0)
 	, m_fade_out(0)
 	, m_ori_volume(1)

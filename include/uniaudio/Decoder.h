@@ -46,8 +46,8 @@ public:
 	virtual int GetChannels() const = 0;
 	virtual int GetBitDepth() const = 0;
 
-	// return second
-	virtual float GetLength() const  = 0;
+	// in second
+	virtual float GetDuration() const  = 0;
 
 	const unsigned char* GetBuffer() const { return m_buf; }
 	int GetBufferSize() const { return m_buf_size; }

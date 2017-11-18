@@ -122,7 +122,7 @@ int Mpg123Decoder::GetBitDepth() const
 	return 16;
 }
 
-float Mpg123Decoder::GetLength() const
+float Mpg123Decoder::GetDuration() const
 {
 	return m_length == 0 ? 0 : (float)m_length / m_sample_rate;
 }
