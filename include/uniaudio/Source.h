@@ -31,12 +31,18 @@ public:
 	virtual void Seek(float offset) = 0;
 	virtual float Tell() = 0;
 
-	void SetOffset(float offset) { m_offset = offset; }
-	void SetDuration(float duration) { m_duration = duration; }
+	void  SetOffset(float offset) { m_offset = offset; }
+	float GetOffset() const { return m_offset; }
+	void  SetDuration(float duration) { m_duration = duration; }
+	float GetDuration() const { return m_duration; }
 
-	void SetFadeIn(float time) { m_fade_in = time; }
-	void SetFadeOut(float time) { m_fade_out = time; }
+	void  SetFadeIn(float time) { m_fade_in = time; }
+	float GetFadeIn() const { return m_fade_in; }
+	void  SetFadeOut(float time) { m_fade_out = time; }
+	float GetFadeOut() const { return m_fade_out; }
 
+	void  SetOriVolume(float volume) { m_ori_volume = volume; }
+	float GetOriVolume() const { return m_ori_volume; }
 	float GetCurrVolume() const { return m_curr_volume; }
 
 protected:
