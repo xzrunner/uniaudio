@@ -430,8 +430,6 @@ void Source::SeekImpl(float offset)
 
 	if (m_stream) 
 	{
-		m_curr_offset = offset;
-
 		bool looping = IsLooping();
 		m_ibuf->Seek(offset, looping);
 		if (m_mix) {
@@ -441,6 +439,7 @@ void Source::SeekImpl(float offset)
 		bool paused = m_paused;
 		StopImpl();
 		PlayImpl();
+		m_curr_offset = offset;
 		if (paused) {
 			PauseImpl();
 		}
