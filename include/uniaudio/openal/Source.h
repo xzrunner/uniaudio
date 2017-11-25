@@ -99,7 +99,7 @@ private:
 
 	// no mix
 	ALuint m_player;
-	static const unsigned int MAX_BUFFERS = 32;
+	static const unsigned int MAX_BUFFERS = 16;
 	ALuint m_buffers[MAX_BUFFERS];
 
 }; // Source
