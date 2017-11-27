@@ -62,6 +62,10 @@ Decoder* Mpg123Decoder::Clone()
 
 int Mpg123Decoder::Decode()
 {
+	if (!m_handle) {
+		return 0;
+	}
+
 	int size = 0;
 
 	while (size < m_buf_size && !m_eof)
@@ -88,6 +92,10 @@ int Mpg123Decoder::Decode()
 
 bool Mpg123Decoder::Seek(float s)
 {
+	if (!m_handle) {
+		return false;
+	}
+
 	off_t offset = (off_t) (s * static_cast<double>(m_sample_rate));
 
 	if (offset < 0) {
@@ -104,6 +112,10 @@ bool Mpg123Decoder::Seek(float s)
 
 bool Mpg123Decoder::Rewind()
 {
+	if (!m_handle) {
+		return false;
+	}
+
 	m_eof = false;
 	if (mpg123_seek(m_handle, 0, SEEK_SET) >= 0) {
 		return true;
