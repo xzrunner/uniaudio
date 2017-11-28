@@ -8,6 +8,8 @@
 
 #include <assert.h>
 
+#define FORCE_REPLAY
+
 namespace ua
 {
 namespace opensl
