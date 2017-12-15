@@ -6,17 +6,12 @@
 
 #include <cu/uncopyable.h>
 #include <cu/cu_stl.h>
+#include <multitask/Thread.h>
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
 #include <queue>
-#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
-#include <mutex>
-#include <mingw.mutex.h>
-#else
-#include <mutex>
-#endif
 #include <memory>
 
 namespace ua

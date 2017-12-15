@@ -1,13 +1,9 @@
 #ifndef _UNIAUDIO_OUTPUT_BUFFER_H_
 #define _UNIAUDIO_OUTPUT_BUFFER_H_
 
+#include <multitask/Thread.h>
+
 #include <list>
-#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
-#include <mutex>
-#include <mingw.mutex.h>
-#else
-#include <mutex>
-#endif
 
 #include <stdint.h>
 
