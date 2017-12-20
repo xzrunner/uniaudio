@@ -17,6 +17,11 @@ std::unique_ptr<Decoder> DecoderFactory::Create(const CU_STR& filepath, int buf_
 	std::unique_ptr<Decoder> decoder;
 
 	CU_STR ext = filepath.substr(filepath.find_last_of('.') + 1);
+	// not ext, md5
+	if (ext.size() > 10) {
+		ext = filepath.substr(0, filepath.find_last_of('.'));
+		ext = ext.substr(ext.find_last_of('.') + 1);
+	}
 	std::transform(ext.begin(), ext.end(), ext.begin(), tolower);
 
 	if (false)
