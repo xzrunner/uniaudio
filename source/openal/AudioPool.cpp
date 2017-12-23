@@ -235,7 +235,7 @@ float AudioPool::Tell(const std::shared_ptr<Source>& source)
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	return source->Tell();
+	return source->TellImpl();
 }
 
 /************************************************************************/

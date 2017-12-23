@@ -198,7 +198,7 @@ void AudioPool::Seek(const std::shared_ptr<Source>& source, float offset)
 float AudioPool::Tell(const std::shared_ptr<Source>& source)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
-	return source->Tell();
+	return source->TellImpl();
 }
 
 void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
