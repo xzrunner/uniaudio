@@ -29,6 +29,8 @@ public:
 	virtual void Resume() override final;
 	virtual void Rewind() override final;
 
+	virtual void SetVolume(float volume) override final;
+
 public:
 	// 10ms length.
 	static const float BUFFER_TIME_LEN;

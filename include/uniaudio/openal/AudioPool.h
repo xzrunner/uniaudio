@@ -39,6 +39,9 @@ public:
 	void Seek(const std::shared_ptr<Source>& source, float offset);
 	float Tell(const std::shared_ptr<Source>& source);
 
+	float GetVolume() const { return m_volume; }
+	void  SetVolume(float volume) { m_volume = volume; }
+
 private:
 	class QueuePlayer
 	{
@@ -73,6 +76,9 @@ private:
 	QueuePlayer m_queue_player;
 
 	std::atomic<bool> m_active;
+
+	// status
+	float m_volume;
 
 }; // AudioPool
 

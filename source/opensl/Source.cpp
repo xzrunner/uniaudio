@@ -343,7 +343,7 @@ void Source::Stream()
 
 void Source::UpdateCurrVolume()
 {
-	m_curr_volume = m_ori_volume;
+	m_curr_volume = m_ori_volume * m_pool->GetVolume();
 
 	float offset = m_ibuf->GetOffset();
 	if (m_fade_in > 0 && offset < m_fade_in) {

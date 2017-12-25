@@ -40,6 +40,8 @@ public:
 	virtual void Resume() override final;
 	virtual void Rewind() override final;
 
+	virtual void SetVolume(float volume) override final;
+
 #ifdef __ANDROID__
 	void InitAAssetMgr(JNIEnv* env, jobject assetManager);
 	bool LoadAssetFile(const CU_STR& filepath, SLDataLocator_AndroidFD* loc_fd);

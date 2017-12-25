@@ -105,6 +105,13 @@ void AudioContext::Rewind()
 	}
 }
 
+void AudioContext::SetVolume(float volume)
+{
+	if (m_pool) {
+		m_pool->SetVolume(volume);
+	}
+}
+
 #ifdef __ANDROID__
 
 void AudioContext::InitAAssetMgr(JNIEnv* env, jobject assetManager)

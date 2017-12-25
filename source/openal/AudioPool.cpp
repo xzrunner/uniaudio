@@ -31,6 +31,7 @@ private:
 
 AudioPool::AudioPool()
 	: m_active(true)
+	, m_volume(1)
 {
 	ALuint sources[NUM_ASSET_PLAYERS];
 	alGenSources(NUM_ASSET_PLAYERS, sources);	

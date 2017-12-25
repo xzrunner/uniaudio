@@ -26,6 +26,8 @@ public:
 	virtual void Pause() = 0;
 	virtual void Resume() = 0;
 	virtual void Rewind() = 0;
+
+	virtual void SetVolume(float volume) = 0;
 	
 }; // AudioContext
 

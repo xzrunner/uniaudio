@@ -582,7 +582,7 @@ float Source::GetCurrOffset(int freq)
 
 void Source::UpdateCurrVolume()
 {
-	m_curr_volume = m_ori_volume;
+	m_curr_volume = m_ori_volume * m_pool->GetVolume();
 
 	float offset = GetCurrOffset();
 	if (m_fade_in > 0 && offset < m_fade_in) {

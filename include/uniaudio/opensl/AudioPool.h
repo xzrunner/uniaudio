@@ -43,6 +43,9 @@ public:
 
 	void ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq);
 
+	float GetVolume() const { return m_volume; }
+	void  SetVolume(float volume) { m_volume = volume; }
+
 private:
 	void CreateAssetsAudioPlayer();
 	void CreateBufferQueueAudioPlayer();
@@ -69,6 +72,9 @@ private:
 	// queue
 	QueuePlayer m_queue_player;
 	AudioMixer  m_queue_mixer;
+
+	// status
+	float m_volume;
 
 }; // AudioPool
 

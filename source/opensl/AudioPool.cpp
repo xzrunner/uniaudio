@@ -19,6 +19,7 @@ namespace opensl
 AudioPool::AudioPool(AudioContext* ctx)
 	: m_ctx(ctx)
 	, m_queue_mixer(AudioContext::BUFFER_TIME_LEN)
+	, m_volume(1)
 {
 	CreateAssetsAudioPlayer();
 
