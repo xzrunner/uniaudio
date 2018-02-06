@@ -1,0 +1,5 @@
+uniaudio/
+projects/*
+
+!projects/uniaudio.vcxproj
+!projects/uniaudio.vcxproj.filters
