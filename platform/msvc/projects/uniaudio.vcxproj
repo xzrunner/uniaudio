@@ -53,7 +53,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src;..\..\..\..\guard\include;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\memmgr\include;..\..\..\..\flatten\include;..\..\..\..\cooking\include;..\..\..\..\ds\src\ds;..\..\..\..\multitask\include;..\..\..\..\external\mpg123\include;..\..\..\..\external\c99;..\..\..\..\external\openal32\include;..\..\..\..\external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src;..\..\..\..\guard\include;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\memmgr\include;..\..\..\..\cooking\include;..\..\..\..\ds\src\ds;..\..\..\..\multitask\include;..\..\..\..\external\mpg123\include;..\..\..\..\external\c99;..\..\..\..\external\openal32\include;..\..\..\..\external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;__STDC_LIMIT_MACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -67,7 +67,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src;..\..\..\..\guard\include;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\memmgr\include;..\..\..\..\flatten\include;..\..\..\..\cooking\include;..\..\..\..\ds\src\ds;..\..\..\..\multitask\include;..\..\..\..\external\mpg123\include;..\..\..\..\external\c99;..\..\..\..\external\openal32\include;..\..\..\..\external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\external;..\..\..\..\cu\src;..\..\..\..\guard\include;..\..\..\..\fs\src\fs;..\..\..\..\logger\src\logger;..\..\..\..\memmgr\include;..\..\..\..\cooking\include;..\..\..\..\ds\src\ds;..\..\..\..\multitask\include;..\..\..\..\external\mpg123\include;..\..\..\..\external\c99;..\..\..\..\external\openal32\include;..\..\..\..\external\pthread\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;__STDC_LIMIT_MACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
