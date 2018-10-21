@@ -78,7 +78,7 @@ bool AudioPool::Play(const std::shared_ptr<Source>& source)
 		return true;
 	}
 
-	if (!source->IsStream()) 
+	if (!source->IsStream())
 	{
 		if (m_asset_player_freelist.empty()) {
 			return false;
@@ -91,7 +91,7 @@ bool AudioPool::Play(const std::shared_ptr<Source>& source)
 			return false;
 		}
 
-		source->SetPlayer(player);	
+		source->SetPlayer(player);
 	}
 
 	m_playing.insert(source);
@@ -109,7 +109,7 @@ void AudioPool::Stop()
 	for ( ; itr != m_playing.end(); ++itr)
 	{
 		auto& s = *itr;
-		if (!s->IsStream()) 
+		if (!s->IsStream())
 		{
 			AssetPlayer* player = s->GetPlayer();
 			assert(player);
@@ -247,7 +247,7 @@ void AudioPool::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq)
 
 void AudioPool::CreateAssetsAudioPlayer()
 {
-	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i) 
+	for (int i = 0; i < NUM_ASSET_PLAYERS; ++i)
 	{
 		AssetPlayer* player = new AssetPlayer;
 		if (!player) {
@@ -448,7 +448,7 @@ bool AudioPool::InitAssetsAudioPlayer(AssetPlayer* player, const std::shared_ptr
 		}
 
 		// todo: life for source
-		(*player->play)->RegisterCallback(player->play, asset_player_cb, 
+		(*player->play)->RegisterCallback(player->play, asset_player_cb,
 			const_cast<void*>(static_cast<const void*>(source.get())));
 	} catch (Exception&) {
 		ret = false;

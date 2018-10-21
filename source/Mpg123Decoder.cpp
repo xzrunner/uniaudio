@@ -87,7 +87,7 @@ int Mpg123Decoder::Decode()
 		}
 	}
 
-	return size; 
+	return size;
 }
 
 bool Mpg123Decoder::Seek(float s)
@@ -240,7 +240,7 @@ void Mpg123Decoder::InitHandle()
 	}
 
 	// Suppressing all mpg123 messages.
-	mpg123_param(m_handle, MPG123_ADD_FLAGS, MPG123_QUIET, 0);	
+	mpg123_param(m_handle, MPG123_ADD_FLAGS, MPG123_QUIET, 0);
 
 	int ret = mpg123_replace_reader_handle(m_handle, &read_callback, &seek_callback, &cleanup_callback);
 	if (ret != MPG123_OK) {

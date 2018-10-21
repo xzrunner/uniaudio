@@ -76,7 +76,7 @@ void InputBuffer::Rewind()
 void InputBuffer::Reload(bool looping)
 {
 	m_size = m_decoder->Decode();
-	assert(m_size <= m_decoder->GetBufferSize());	
+	assert(m_size <= m_decoder->GetBufferSize());
 	m_used = 0;
 	if (m_decoder->IsFinished() && looping) {
 		m_decoder->Rewind();

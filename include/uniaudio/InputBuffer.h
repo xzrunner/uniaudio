@@ -28,7 +28,7 @@ public:
 	float GetOffset() const;
 
 	void Rewind();
-	
+
 private:
 	void Reload(bool looping);
 

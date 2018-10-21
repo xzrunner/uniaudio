@@ -20,7 +20,7 @@ static void
 update_cb(void* arg)
 {
 	AudioPool* pool = static_cast<AudioPool*>(arg);
-	pool->Update();	
+	pool->Update();
 }
 
 AudioContext::AudioContext()
@@ -134,7 +134,7 @@ bool AudioContext::LoadAssetFile(const CU_STR& filepath, SLDataLocator_AndroidFD
 	}
 	SLDataLocator_AndroidFD _loc_fd = {SL_DATALOCATOR_ANDROIDFD, fd, start, length};
 	*loc_fd = _loc_fd;
-	
+
 	return true;
 }
 
@@ -145,9 +145,9 @@ void AudioContext::Initialize()
 	try {
 		SLresult result;
 
-		if (m_own_ctx) 
+		if (m_own_ctx)
 		{
-			// create engine			
+			// create engine
 			result = slCreateEngine(&m_engine_obj, 0, nullptr, 0, nullptr, nullptr);
 			if (SL_RESULT_SUCCESS != result) {
 				throw Exception("Could not create opensl engine.");
@@ -166,9 +166,9 @@ void AudioContext::Initialize()
 			throw Exception("Could not get opensl interface.");
 		}
 
-		if (m_own_ctx) 
+		if (m_own_ctx)
 		{
-			// create output mix, with environmental reverb specified as a non-required interface			
+			// create output mix, with environmental reverb specified as a non-required interface
 			const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
 			const SLboolean req[1] = {SL_BOOLEAN_FALSE};
 			result = (*m_engine_engine)->CreateOutputMix(m_engine_engine, &m_output_mix_obj, 1, ids, req);
@@ -209,7 +209,7 @@ void AudioContext::Initialize()
 
 void AudioContext::Terminate()
 {
-	if (m_own_ctx) 
+	if (m_own_ctx)
 	{
 		if (m_engine_obj) {
 			(*m_engine_obj)->Destroy(m_engine_obj);

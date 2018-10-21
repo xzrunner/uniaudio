@@ -68,7 +68,7 @@ Source::Source(const Source& src)
 	, m_filepath(src.m_filepath)
 	, m_player(nullptr)
 {
-	if (src.m_ibuf) 
+	if (src.m_ibuf)
 	{
 		auto decoder = std::unique_ptr<Decoder>(src.m_ibuf->GetDecoder()->Clone());
 		m_ibuf = new InputBuffer(decoder);
@@ -132,7 +132,7 @@ bool Source::Update()
 
 void Source::Play()
 {
-	if (m_active) 
+	if (m_active)
 	{
 		if (m_paused) {
 			m_pool->Resume(shared_from_this());
@@ -224,7 +224,7 @@ void Source::PauseImpl()
 		return;
 	}
 
-	if (m_stream) 
+	if (m_stream)
 	{
 	}
 	else

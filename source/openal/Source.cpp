@@ -52,7 +52,7 @@ Source::Source(AudioPool* pool, const AudioData* data)
 		}
 	} catch (Exception&) {
 		alDeleteBuffers(1, m_buffers);
-		throw;		
+		throw;
 	}
 }
 
@@ -230,7 +230,7 @@ bool Source::Update()
 
 void Source::Play()
 {
-	if (m_active) 
+	if (m_active)
 	{
 		if (m_paused) {
 			m_pool->Resume(shared_from_this());
@@ -428,7 +428,7 @@ void Source::SeekImpl(float offset)
 		return;
 	}
 
-	if (m_stream) 
+	if (m_stream)
 	{
 		bool looping = IsLooping();
 		m_ibuf->Seek(offset, looping);
@@ -443,8 +443,8 @@ void Source::SeekImpl(float offset)
 		if (paused) {
 			PauseImpl();
 		}
-	} 
-	else 
+	}
+	else
 	{
 		alSourcef(m_player, AL_SEC_OFFSET, offset);
 	}
@@ -474,9 +474,9 @@ void Source::SetLooping(bool looping)
 	m_looping = looping;
 }
 
-void Source::SetPlayer(ALuint player) 
-{ 
-	assert(!m_mix); 
+void Source::SetPlayer(ALuint player)
+{
+	assert(!m_mix);
 	m_player = player;
 }
 
@@ -547,7 +547,7 @@ int Source::Stream(ALuint buffer)
 		if (fmt != 0) {
 			alBufferData(buffer, fmt, d->GetBuffer(), decoded, d->GetSampleRate());
 		} else {
-			decoded = 0;			
+			decoded = 0;
 		}
 	}
 
@@ -567,7 +567,7 @@ int Source::Stream(ALuint buffer)
 //	alGetBufferi(b, AL_FREQUENCY, &freq);
 //
 //	assert(freq == m_freq);
-//	
+//
 //	return freq;
 //}
 

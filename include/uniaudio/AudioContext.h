@@ -28,7 +28,7 @@ public:
 	virtual void Rewind() = 0;
 
 	virtual void SetVolume(float volume) = 0;
-	
+
 }; // AudioContext
 
 }

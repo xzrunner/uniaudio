@@ -60,7 +60,7 @@ public:
 
 	void SetPlayer(AssetPlayer* player) { m_player = player; }
 	AssetPlayer* GetPlayer() { return m_player; }
-	
+
 	AudioPool* GetPool() { return m_pool; }
 
 	bool IsStopped() const;

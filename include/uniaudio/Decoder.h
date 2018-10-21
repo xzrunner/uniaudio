@@ -61,7 +61,7 @@ protected:
 	int m_buf_size;
 
 	int m_offset;
-	
+
 	bool m_eof;
 
 	int m_sample_rate;

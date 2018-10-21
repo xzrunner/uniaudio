@@ -19,7 +19,7 @@ static void
 update_cb(void* arg)
 {
 	AudioPool* pool = static_cast<AudioPool*>(arg);
-	pool->Update();	
+	pool->Update();
 }
 
 AudioContext::AudioContext()

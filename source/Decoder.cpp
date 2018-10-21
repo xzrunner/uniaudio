@@ -4,7 +4,7 @@
 namespace ua
 {
 
-Decoder::Decoder(int buf_sz) 
+Decoder::Decoder(int buf_sz)
 	: m_buf(nullptr)
 	, m_buf_size(buf_sz)
 	, m_offset(0)
@@ -32,7 +32,7 @@ Decoder::Decoder(const Decoder& src)
 	}
 }
 
-Decoder::~Decoder() 
+Decoder::~Decoder()
 {
 	if (m_buf) {
 		delete[] m_buf;

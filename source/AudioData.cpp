@@ -28,7 +28,7 @@ AudioData::AudioData(const CU_VEC<ua::AudioData*>& list)
 	, m_sample_rate(Decoder::DEFAULT_SAMPLE_RATE)
 	, m_channels(0)
 	, m_bit_depth(0)
-{	
+{
 	LoadFromList(list);
 }
 
@@ -36,7 +36,7 @@ AudioData::~AudioData()
 {
 	if (m_data) {
 		delete[] m_data;
-	}	
+	}
 }
 
 void AudioData::LoadFromFile(const CU_STR& filepath)
@@ -45,7 +45,7 @@ void AudioData::LoadFromFile(const CU_STR& filepath)
 	if (!decoder) {
 		return;
 	}
-	
+
 	size_t buf_size = 524288; // 0x80000
 	int decoded = decoder->Decode();
 	while (decoded > 0)
@@ -110,7 +110,7 @@ void AudioData::LoadFromList(const CU_VEC<ua::AudioData*>& list)
 		}
 	}
 
-	for (int i = 1; i < sz; ++i) 
+	for (int i = 1; i < sz; ++i)
 	{
 		const ua::AudioData* ad = list[i];
 		if (ad->m_sample_rate != m_sample_rate ||
@@ -125,7 +125,7 @@ void AudioData::LoadFromList(const CU_VEC<ua::AudioData*>& list)
 		}
 
 		int ptr = 0;
-		if (m_bit_depth == 16) 
+		if (m_bit_depth == 16)
 		{
 			short* s = (short*)(ad->m_data);
 			short* d = (short*)(m_data);
@@ -136,7 +136,7 @@ void AudioData::LoadFromList(const CU_VEC<ua::AudioData*>& list)
 				ptr += 2;
 				idx += 1;
 			}
-		} 
+		}
 		else if (m_bit_depth == 8)
 		{
 			while (ptr < m_size && ptr < ad->m_size) {

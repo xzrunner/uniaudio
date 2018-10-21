@@ -19,14 +19,14 @@ public:
     ~CheckOpenal() {
         EatError();
     }
-        
+
 private:
     void EatError() {
         while (alGetError() != AL_NO_ERROR) {
             ;
         }
     }
-        
+
 }; // CheckOpenal
 
 AudioPool::AudioPool()
@@ -34,7 +34,7 @@ AudioPool::AudioPool()
 	, m_volume(1)
 {
 	ALuint sources[NUM_ASSET_PLAYERS];
-	alGenSources(NUM_ASSET_PLAYERS, sources);	
+	alGenSources(NUM_ASSET_PLAYERS, sources);
 	if (alGetError() != AL_NO_ERROR) {
 		throw Exception("Could not openal sources.");
 	}
@@ -69,7 +69,7 @@ void AudioPool::Update()
 	}
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	
+
 	auto itr = m_playing.begin();
 	for ( ; itr != m_playing.end(); )
 	{
@@ -109,7 +109,7 @@ bool AudioPool::Play(const std::shared_ptr<Source>& source)
 		if (m_asset_player_freelist.empty()) {
 			return false;
 		}
-		ALuint player = m_asset_player_freelist.front(); 
+		ALuint player = m_asset_player_freelist.front();
 		m_asset_player_freelist.pop();
 		source->SetPlayer(player);
 	}
@@ -145,7 +145,7 @@ void AudioPool::Stop(const std::shared_ptr<Source>& source)
 	CheckOpenal check;
 
 	std::lock_guard<std::mutex> lock(m_mutex);
-	
+
 	auto itr = m_playing.find(source);
 	if (itr != m_playing.end())
 	{

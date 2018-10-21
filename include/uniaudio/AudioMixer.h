@@ -39,7 +39,7 @@ private:
 private:
 	int32_t* m_mix_buffer;
 	int16_t* m_out_buffer;
-	
+
 	int m_samples;
 
 	bool m_dirty;

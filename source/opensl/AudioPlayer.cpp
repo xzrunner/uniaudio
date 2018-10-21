@@ -11,8 +11,8 @@ namespace opensl
 /* class AssetPlayer                                                    */
 /************************************************************************/
 
-AssetPlayer::AssetPlayer() 
-	: object(nullptr) 
+AssetPlayer::AssetPlayer()
+	: object(nullptr)
 	, play(nullptr)
 	, seek(nullptr)
 	, mute_solo(nullptr)
@@ -20,7 +20,7 @@ AssetPlayer::AssetPlayer()
 {
 }
 
-AssetPlayer::~AssetPlayer() 
+AssetPlayer::~AssetPlayer()
 {
 	if (object) {
 		(*object)->Destroy(object);

@@ -15,14 +15,14 @@ public:
 	Exception(const char* fmt, ...);
 	virtual ~Exception() throw() {}
 
-	inline virtual const char* what() const throw() { 
-		return m_message.c_str(); 
+	inline virtual const char* what() const throw() {
+		return m_message.c_str();
 	}
 
 private:
 	std::string m_message;
 
-}; // Exception 
+}; // Exception
 
 }
 

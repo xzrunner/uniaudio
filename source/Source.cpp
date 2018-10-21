@@ -4,7 +4,7 @@
 namespace ua
 {
 
-Source::Source() 
+Source::Source()
 	: m_offset(0)
 	, m_duration(0)
 	, m_fade_in(0)
