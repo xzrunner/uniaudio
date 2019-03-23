@@ -60,7 +60,7 @@ void AudioMixer::MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 		const int8_t* src_ptr = reinterpret_cast<const int8_t*>(buf);
 		int count = 0;
 		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i, ++dst_ptr) {
-			*dst_ptr += (*src_ptr) * volume;
+			*dst_ptr += static_cast<int32_t>((*src_ptr) * volume);
 			if (++count == up_sample_rate) {
 				count = 0;
 				++src_ptr;
@@ -72,7 +72,7 @@ void AudioMixer::MixFast(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 		const int16_t* src_ptr = reinterpret_cast<const int16_t*>(buf);
 		int count = 0;
 		for (int i = 0, n = m_samples * DEFAULT_CHANNELS; i < n; ++i, ++dst_ptr) {
-			*dst_ptr += (*src_ptr) * volume;
+			*dst_ptr += static_cast<int32_t>((*src_ptr) * volume);
 			if (++count == up_sample_rate) {
 				count = 0;
 				++src_ptr;
@@ -96,7 +96,7 @@ void AudioMixer::MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 			for (int i = 0; i < dst_samples; ++i)
 			{
 				int src_idx = i * sample_rate / DEFAULT_SAMPLE_RATE;
-				int src_val = static_cast<int8_t>(buf[src_idx]) * volume;
+				int src_val = static_cast<int>(buf[src_idx] * volume);
 				*ptr++ = src_val;
 				*ptr++ = src_val;
 			}
@@ -106,7 +106,7 @@ void AudioMixer::MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 			for (int i = 0; i < dst_samples; ++i)
 			{
 				int src_idx = i * sample_rate / DEFAULT_SAMPLE_RATE;
-				int src_val = ((const int16_t*)buf)[src_idx] * volume;
+				int src_val = static_cast<int>(((const int16_t*)buf)[src_idx] * volume);
 				*ptr++ = src_val;
 				*ptr++ = src_val;
 			}
@@ -119,9 +119,9 @@ void AudioMixer::MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 			for (int i = 0; i < dst_samples; ++i)
 			{
 				int src_idx = i * sample_rate / DEFAULT_SAMPLE_RATE * 2;
-				int src_val = static_cast<int8_t>(buf[src_idx]) * volume;
+				int src_val = static_cast<int>(buf[src_idx] * volume);
 				*ptr++ = src_val;
-				src_val = static_cast<int8_t>(buf[src_idx + 1]);
+				src_val = static_cast<int>(buf[src_idx + 1]);
 				*ptr++ = src_val;
 			}
 		}
@@ -130,9 +130,9 @@ void AudioMixer::MixSlow(const uint8_t* buf, int buf_sz, int sample_rate, int bi
 			for (int i = 0; i < dst_samples; ++i)
 			{
 				int src_idx = i * sample_rate / DEFAULT_SAMPLE_RATE * 2;
-				int src_val = ((const int16_t*)buf)[src_idx] * volume;
+				int src_val = static_cast<int>(((const int16_t*)buf)[src_idx] * volume);
 				*ptr++ = src_val;
-				src_val = ((const int16_t*)buf)[src_idx + 1];
+				src_val = static_cast<int>(((const int16_t*)buf)[src_idx + 1]);
 				*ptr++ = src_val;
 			}
 		}
